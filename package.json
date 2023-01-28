@@ -16,10 +16,12 @@
     "@trpc/next": "^10.8.1",
     "@trpc/react-query": "^10.8.1",
     "@trpc/server": "^10.8.1",
+    "music-tempo": "^1.0.3",
     "next": "13.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
+    "web-audio-api": "^0.2.2",
     "zod": "^3.20.2"
   },
   "devDependencies": {
