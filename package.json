@@ -16,6 +16,7 @@
     "@trpc/next": "^10.8.1",
     "@trpc/react-query": "^10.8.1",
     "@trpc/server": "^10.8.1",
+    "ffmetadata": "^1.7.0",
     "music-tempo": "^1.0.3",
     "next": "13.1.2",
     "react": "18.2.0",

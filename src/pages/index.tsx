@@ -1,13 +1,29 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useCallback, useState } from "react";
 import { TrackList } from "../components/track-list";
+import { Track } from "../track.types";
 
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  const tracks = api.example.getAllTracks.useQuery()
-  
+  const { data: tracks, isError, error } = api.example.getAllTracks.useQuery()
+  const { mutateAsync: analyzeBpm, isLoading: isAnalyzing } = api.example.analyzeBpmForTrack.useMutation()
+  const [bpmResults, setResults] = useState<number[]>([])
+  const analyzeTracks = useCallback(async (event:any) => {
+    event.preventDefault();
+    if (isAnalyzing || !tracks) return;
+    for (const track of tracks) {
+      console.log({ tracks })
+      console.log({filename: track.filename, bpm: Boolean(event.target.bpm.checked ), move: Boolean(event.target?.move?.checked )})
+      const bpm = await analyzeBpm({filename: track.filename, bpm: Boolean(event.target.bpm.checked ), move: Boolean(event.target?.move?.checked )});
+      // setResults((results => [...results, bpm]))
+      console.log(bpm)
+    }
+
+  }, [tracks, setResults])
   return (
     <>
       <Head>
@@ -21,18 +37,26 @@ const Home: NextPage = () => {
             Track<span className="text-[hsl(280,100%,70%)]">Flow</span>
           </h1>
           {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8"> */}
-            <div
-
+          <form onSubmit={analyzeTracks} className="flex flex-col items-center justify-center">
+            <div className="text-xl text-white flex gap-2 p-4">
+              <input id="bpm" type="checkbox" name="bpm" />
+              <label htmlFor="bpm">Analyse BPM</label>
+            </div>
+            <div className="text-xl text-white flex gap-2 p-4">
+              <input id="move" type="checkbox" name="move" />
+              <label htmlFor="move">Move files</label>
+            </div>
+            <button
+              type="submit"
               className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
             >
               <h3 className="text-2xl font-bold">Analyze tracks →</h3>
-              <div className="text-lg">
-                Start analyzing BPM from tracks located in your <pre>/music</pre> folder
-              </div>
-            </div>
+            </button>
+          </form>
           {/* </div> */}
-          {tracks.isError && <p>{tracks.error.message}</p>}
-          <TrackList tracks={tracks.data} />
+          {isError && <p>{error.message}</p>}
+          {JSON.stringify(bpmResults)}
+          <TrackList tracks={tracks} />
         </div>
       </main>
     </>
