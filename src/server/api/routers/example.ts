@@ -4,10 +4,11 @@ import { z } from "zod";
 import MusicTempo from 'music-tempo'
 import { AudioContext } from 'web-audio-api'
 import ffmetadata from 'ffmetadata';
-ffmetadata.setFfmpegPath("C:/ffmpeg/ffmpeg.exe");
+const ffmpegPath = process.platform === "win32" ? "C:/ffmpeg/ffmpeg.exe" : path.join('ffmpeg', 'ffmpeg');
+ffmetadata.setFfmpegPath(ffmpegPath);
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import path from "path";
+import path, { dirname } from "path";
 import { Track } from "../../../track.types";
 const musicFolder = 'music'
 export const exampleRouter = createTRPCRouter({
@@ -31,7 +32,7 @@ export const exampleRouter = createTRPCRouter({
 
         const metadata = await readMetadata(filename);
         const track: Track = {
-          title: metadata.title ?? file,
+          title: metadata?.title as string ?? file,
           bpm: Number(metadata.TBPM),
           filename: file
         }
