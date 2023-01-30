@@ -12,31 +12,22 @@ import path, { dirname } from "path";
 import { Track } from "../../../track.types";
 const musicFolder = 'music'
 export const exampleRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.example.findMany();
-  }),
   getAllTracks: publicProcedure.query(async () => {
     const files = await readdir(musicFolder);
     if (!files) return [];
+
     const tracks: Track[] = [];
     for (const file of files) {
       const filename = path.join(musicFolder, file);
-      if ((await lstat(filename)).isFile()) {
+      if ((await lstat(filename)).isFile() && filename.endsWith('.mp3')) {
 
-        const metadata = await readMetadata(filename);
-        const track: Track = {
-          title: metadata?.title as string ?? file,
-          bpm: Number(metadata.TBPM),
+        const { title, artist, TBPM } = await readMetadata(filename);
+        tracks.push({
+          title: title ?? file,
+          bpm: TBPM ? Number(TBPM) : undefined,
+          artist,
           filename: file
-        }
-        tracks.push(track);
+        });
       }
     }
 
@@ -46,20 +37,17 @@ export const exampleRouter = createTRPCRouter({
     .input(z.object({ filename: z.string(), bpm: z.boolean(), move: z.boolean() }))
     .mutation(async ({ input: { filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles } }) => {
       const file = readFileSync(path.join(musicFolder, filename))
-      console.log(`Analyzing ${filename}, ${shouldAnalyzeBpm}`);
       const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(path.join(musicFolder, filename)))?.TBPM);
-      console.log({ bpm })
       if (shouldAnalyzeBpm) {
         await writeMetadata(path.join(musicFolder, filename), { TBPM: bpm })
       }
-      // return bpm;
       if (shouldMoveFiles) {
         if (!existsSync(path.join(musicFolder, bpm,))) {
           await mkdir(path.join(musicFolder, bpm,))
         }
         await rename(path.join(musicFolder, filename), path.join(musicFolder, bpm, filename))
       }
-
+      return bpm;
 
     })
 });
@@ -75,7 +63,7 @@ const analyzeBpm = (buffer: Buffer): Promise<number> => {
   })
 }
 
-function readMetadata(filename: string): Promise<Record<string, any>> {
+function readMetadata(filename: string): Promise<Record<string, string>> {
   return new Promise((resolve, reject) => {
     ffmetadata.read(filename, function (err: Error, data: any) {
       if (err)
