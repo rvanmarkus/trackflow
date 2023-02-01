@@ -1,10 +1,11 @@
 import { FunctionComponent } from "react";
 import { Track } from "../track.types";
+import { Spinner } from "./spinner";
 
 export const TrackList: FunctionComponent<{ tracks: Track[] | undefined }> = ({
   tracks,
 }) => {
-  if (!tracks) return <>Loading tracks...</>;
+  if (!tracks) return <Spinner>Loading tracks...</Spinner>;
 
   return (
     <div className="flex flex-col gap-2">

@@ -2,57 +2,64 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { SyntheticEvent, useCallback, useRef, useState } from "react";
+import { Spinner } from "../components/spinner";
 import { TrackList } from "../components/track-list";
 import { Track } from "../track.types";
 
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  const { data: tracks, isError, error } = api.example.getAllTracks.useQuery();
+  const {
+    data: tracks,
+    isError,
+    error,
+    isLoading: isLoadingTracks,
+  } = api.example.getAllTracks.useQuery();
   const { mutateAsync: analyzeBpm, isLoading: isAnalyzing } =
     api.example.analyzeBpmForTrack.useMutation();
-  const [bpmResults, setResults] = useState<number[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+
   const utils = api.useContext();
+  const optimisticTrackUpdate = useCallback(
+    (filename: string, partial: Partial<Track>) =>
+      utils.example.getAllTracks.setData(undefined, (data) => {
+        if (!data) return;
+        return data.map((existing) => {
+          if (existing.filename === filename) {
+            return { ...existing, ...partial };
+          }
+          return existing;
+        });
+      }),
+    [utils.example.getAllTracks]
+  );
   const analyzeTracks = useCallback(
-    async (event: SubmitEvent) => {
+    (event: SyntheticEvent<HTMLFormElement>) => {
+      const form = formRef.current;
       event.preventDefault();
-      if (isAnalyzing || !tracks) return;
-      for (const track of tracks) {
-        console.log({ tracks });
-        console.log({
-          filename: track.filename,
-          bpm: Boolean(event.target.bpm.checked),
-          move: Boolean((event?.target as any)?.move?.checked),
-        });
-        utils.example.getAllTracks.setData(undefined, (data) => {
-          if (!data) return;
-          return data.map((existing) => {
-            if (existing.filename === track.filename) {
-              return { ...existing, isAnalyzing: true };
-            }
-            return existing;
-          });
-        });
-        const bpm = Number(
-          await analyzeBpm({
-            filename: track.filename,
-            bpm: Boolean(event.target.bpm.checked),
-            move: Boolean(event.target?.move?.checked)
-          })
-        );
-        utils.example.getAllTracks.setData(undefined, (data) => {
-          if (!data) return;
-          return data.map((existing) => {
-            if (existing.filename === track.filename) {
-              return { ...existing, bpm, isAnalyzing: false };
-            }
-            return existing;
-          });
-        });
-      }
+
+      if (!form || isAnalyzing || !tracks) return;
+
+      const formValues = {
+        bpm: (form.elements.namedItem("bpm") as HTMLInputElement).checked,
+        move: (form.elements.namedItem("move") as HTMLInputElement).checked,
+      };
+
+      void (async (formValues) => {
+        for (const track of tracks) {
+          optimisticTrackUpdate(track.filename, { isAnalyzing: true });
+          const bpm = Number(
+            await analyzeBpm({
+              filename: track.filename,
+              ...formValues,
+            })
+          );
+          optimisticTrackUpdate(track.filename, { bpm, isAnalyzing: false });
+        }
+      })(formValues);
     },
-    [isAnalyzing, tracks, analyzeBpm, utils.example.getAllTracks]
+    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeBpm]
   );
   return (
     <>
@@ -69,6 +76,7 @@ const Home: NextPage = () => {
           {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8"> */}
           <form
             onSubmit={analyzeTracks}
+            ref={formRef}
             className="flex flex-col items-center justify-center"
           >
             <div className="flex gap-2 p-4 text-xl text-white">
@@ -81,14 +89,17 @@ const Home: NextPage = () => {
             </div>
             <button
               type="submit"
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+              disabled={isAnalyzing}
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 ${
+                isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
+              }`}
             >
-              <h3 className="text-2xl font-bold">Analyze tracks →</h3>
+              {isAnalyzing && <Spinner />}
+              <h3 className="text-2xl font-bold">{isAnalyzing ? 'Analyzing...' : 'Analyze tracks →'}</h3>
             </button>
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          {JSON.stringify(bpmResults)}
           <TrackList tracks={tracks} />
         </div>
       </main>
