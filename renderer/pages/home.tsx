@@ -11,17 +11,20 @@ import { Track } from "../track.types";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
+  const [musicFolder, setMusicFolder] = useState<string | undefined>(undefined)
   const {
     data: tracks,
     isError,
     error,
     isLoading: isLoadingTracks,
-  } = api.example.getAllTracks.useQuery();
+  } = api.example.getAllTracks.useQuery(musicFolder, {enabled: !!musicFolder});
   const { mutateAsync: analyzeBpm, isLoading: isAnalyzing } =
     api.example.analyzeBpmForTrack.useMutation();
   const openFolder = useCallback(() => {
-    const response = ipcRenderer.sendSync('get-music-directory')
-    console.log(response);
+    const {filePaths} = ipcRenderer.sendSync('get-music-directory')
+    if (filePaths) {
+      setMusicFolder(filePaths[0]);
+    }
   }, [])
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -53,18 +56,26 @@ const Home: NextPage = () => {
 
       void (async (formValues) => {
         for (const track of tracks) {
-          optimisticTrackUpdate(track.filename, { isAnalyzing: true });
-          const bpm = Number(
-            await analyzeBpm({
-              filename: track.filename,
-              ...formValues,
-            })
-          );
-          optimisticTrackUpdate(track.filename, { bpm, isAnalyzing: false });
+          console.log(track, tracks)
+          if (! track.bpm) {
+            optimisticTrackUpdate(track.filename, { isAnalyzing: true });
+            try {
+              const bpm = Number(
+                await analyzeBpm({
+                  filename: track.filename,
+                  musicFolder,
+                  ...formValues,
+                })
+              );
+              optimisticTrackUpdate(track.filename, { bpm, isAnalyzing: false });
+            } catch (error) {
+              console.log({error})
+            }
+          }
         }
       })(formValues);
     },
-    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeBpm]
+    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeBpm, musicFolder]
   );
   return (
     <>

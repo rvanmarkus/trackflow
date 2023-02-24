@@ -11,37 +11,35 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import path, { dirname } from "path";
 import { Track } from "../../../track.types";
 import { app, dialog } from "electron";
-const musicFolder = 'music'
 export const exampleRouter = createTRPCRouter({
-  getOutputDirectory: publicProcedure.query(async () => {
-    const directory = await dialog.showOpenDialog({ properties: ['openDirectory'] });
- return 'test'
-  }),
-  getAllTracks: publicProcedure.query(async () => {
+  getAllTracks: publicProcedure
+    .input(z.string())
+    .query(async ({input: musicFolder}) => {
     const files = await readdir(musicFolder);
     if (!files) return [];
 
     const tracks: Track[] = [];
     for (const file of files) {
       const filename = path.join(musicFolder, file);
-      if ((await lstat(filename)).isFile() && filename.endsWith('.mp3')) {
-
-        const { title, artist, TBPM } = await readMetadata(filename);
-        tracks.push({
-          title: title ?? file,
-          bpm: TBPM ? Number(TBPM) : undefined,
-          artist,
-          filename: file
-        });
-      }
+      if (! filename.endsWith('.mp3') || filename.endsWith('.ffmpeg.mp3')) return;
+      if (! (await lstat(filename)).isFile()) return;
+      
+      const { title, artist, TBPM } = await readMetadata(filename);
+      tracks.push({
+        title: title ?? file,
+        bpm: TBPM ? Number(TBPM) : undefined,
+        artist,
+        filename: file
+      });
     }
 
     return tracks;
   }),
   analyzeBpmForTrack: publicProcedure
-    .input(z.object({ filename: z.string(), bpm: z.boolean(), move: z.boolean() }))
-    .mutation(async ({ input: { filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles } }) => {
+    .input(z.object({ filename: z.string(), bpm: z.boolean(), move: z.boolean(), musicFolder: z.string() }))
+    .mutation(async ({ input: { filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, musicFolder } }) => {
       const file = readFileSync(path.join(musicFolder, filename))
+      
       const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(path.join(musicFolder, filename)))?.TBPM);
       if (shouldAnalyzeBpm) {
         await writeMetadata(path.join(musicFolder, filename), { TBPM: bpm })
@@ -59,10 +57,14 @@ export const exampleRouter = createTRPCRouter({
 
 const analyzeBpm = (buffer: Buffer): Promise<number> => {
   const context = new AudioContext()
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     context.decodeAudioData(buffer, (data: any) => {
-      const mt = new MusicTempo(data?.getChannelData(0));
-      resolve(Math.round(mt.tempo))
+      try {
+        const mt = new MusicTempo(data?.getChannelData(0));
+        resolve(Math.round(mt.tempo))
+      } catch (error) {
+        reject(error);
+      }
     })
 
   })
