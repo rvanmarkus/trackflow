@@ -2,8 +2,13 @@ import {
   screen,
   BrowserWindow,
   BrowserWindowConstructorOptions,
+  app,
 } from 'electron';
 import Store from 'electron-store';
+import { createIPCHandler } from 'electron-trpc/main';
+import path from 'path';
+import { appRouter } from '../api/root';
+import { trackRouter } from '../api/routers/track-router';
 
 export default (windowName: string, options: BrowserWindowConstructorOptions): BrowserWindow => {
   const key = 'window-state';
@@ -71,14 +76,17 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
     ...state,
     ...options,
     webPreferences: {
+      preload: path.join(app.getAppPath(), 'app', 'preload.js'),
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
+      webSecurity: false,
       ...options.webPreferences,
     },
   };
   win = new BrowserWindow(browserOptions);
 
   win.on('close', saveState);
+  createIPCHandler({ router: appRouter, windows: [win] });
 
   return win;
 };

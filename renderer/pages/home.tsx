@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { dialog, ipcRenderer } from "electron";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -11,25 +10,32 @@ import { Track } from "../track.types";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  const [musicFolder, setMusicFolder] = useState<string | undefined>(undefined)
+  // const [musicFolder, setMusicFolder] = useState<string | undefined>(
+  //   "/Users/robbert/projects/trackflow/music"
+  // );
+  const { data: musicFolder, refetch: openFolder } = api.example.getMusicFolder.useQuery(null, {
+    enabled: true,
+  });
   const {
     data: tracks,
     isError,
     error,
     isLoading: isLoadingTracks,
-  } = api.example.getAllTracks.useQuery(musicFolder, {enabled: !!musicFolder});
+  } = api.example.getAllTracks.useQuery(musicFolder, {
+    enabled: !!musicFolder,
+  });
   const { mutateAsync: analyzeBpm, isLoading: isAnalyzing } =
     api.example.analyzeBpmForTrack.useMutation();
-  const openFolder = useCallback(() => {
-    const {filePaths} = ipcRenderer.sendSync('get-music-directory')
-    if (filePaths) {
-      setMusicFolder(filePaths[0]);
-    }
-  }, [])
+  // const openFolder = useCallback(() => {
+
+  //   if (filePaths) {
+  //     setMusicFolder(filePaths[0]);
+  //   }
+  // }, [])
   const formRef = useRef<HTMLFormElement>(null);
 
   const utils = api.useContext();
-  const optimisticTrackUpdate = useCallback(  
+  const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
       utils.example.getAllTracks.setData(undefined, (data) => {
         if (!data) return;
@@ -56,8 +62,8 @@ const Home: NextPage = () => {
 
       void (async (formValues) => {
         for (const track of tracks) {
-          console.log(track, tracks)
-          if (! track.bpm) {
+          console.log(track, tracks);
+          if (!track.bpm) {
             optimisticTrackUpdate(track.filename, { isAnalyzing: true });
             try {
               const bpm = Number(
@@ -67,9 +73,12 @@ const Home: NextPage = () => {
                   ...formValues,
                 })
               );
-              optimisticTrackUpdate(track.filename, { bpm, isAnalyzing: false });
+              optimisticTrackUpdate(track.filename, {
+                bpm,
+                isAnalyzing: false,
+              });
             } catch (error) {
-              console.log({error})
+              console.log({ error });
             }
           }
         }
@@ -112,7 +121,9 @@ const Home: NextPage = () => {
               }`}
             >
               {isAnalyzing && <Spinner />}
-              <h3 className="text-2xl font-bold">{isAnalyzing ? 'Analyzing...' : 'Analyze tracks →'}</h3>
+              <h3 className="text-2xl font-bold">
+                {isAnalyzing ? "Analyzing..." : "Analyze tracks →"}
+              </h3>
             </button>
           </form>
           {/* </div> */}
