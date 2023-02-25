@@ -36,7 +36,7 @@ const Home: NextPage = () => {
   //   }
   // }, [])
   const formRef = useRef<HTMLFormElement>(null);
-
+  console.log(tracks)
   const utils = api.useContext();
   const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
@@ -62,27 +62,29 @@ const Home: NextPage = () => {
         bpm: (form.elements.namedItem("bpm") as HTMLInputElement).checked,
         move: (form.elements.namedItem("move") as HTMLInputElement).checked,
       };
+      console.log({ formValues });
 
       void (async (formValues) => {
         for (const track of tracks) {
           console.log(track, tracks);
-          if (!track.bpm) {
-            optimisticTrackUpdate(track.filename, { isAnalyzing: true });
-            try {
-              const bpm = Number(
-                await analyzeBpm({
-                  filename: track.filename,
-                  musicFolder,
-                  ...formValues,
-                })
-              );
-              optimisticTrackUpdate(track.filename, {
-                bpm,
-                isAnalyzing: false,
-              });
-            } catch (error) {
-              console.log({ error });
-            }
+          console.log("hier");
+
+          optimisticTrackUpdate(track.filename, { isAnalyzing: true });
+          try {
+            const bpm = Number(
+              await analyzeBpm({
+                filename: track.filename,
+                musicFolder,
+                ...formValues,
+              })
+            );
+
+            optimisticTrackUpdate(track.filename, {
+              bpm,
+              isAnalyzing: false,
+            });
+          } catch (error) {
+            console.log({ error });
           }
         }
       })(formValues);
