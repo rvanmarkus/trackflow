@@ -86,7 +86,7 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
   win = new BrowserWindow(browserOptions);
 
   win.on('close', saveState);
-  createIPCHandler({ router: appRouter, windows: [win] });
+// createIPCHandler({ router: appRouter, windows: [win] });
 
   return win;
 };
