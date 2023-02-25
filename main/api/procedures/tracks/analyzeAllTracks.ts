@@ -26,10 +26,10 @@ export const analyzeAllTracks = publicProcedure.input(z.object({ bpm: z.boolean(
                     move: false,
                 })))
 
-                return analyzedTracks;
-
+                
             } catch (error) {
                 console.log({ error });
             }
         }
+        return analyzedTracks;
     })
