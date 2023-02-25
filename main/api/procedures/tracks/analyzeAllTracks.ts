@@ -11,13 +11,6 @@ export const analyzeAllTracks = publicProcedure.input(z.object({ bpm: z.boolean(
         const analyzedTracks: string[] = [];
         for (const track of tracks) {
             console.log(track, tracks);
-            // console.log("hier");
-
-            // if (track.bpm) {
-            //     continue
-            // }
-
-            // optimisticTrackUpdate(track.filename, { isAnalyzing: true });
             try {
                 analyzedTracks.push((await caller.analyzeBpmForTrack({
                     filename: track.filename,

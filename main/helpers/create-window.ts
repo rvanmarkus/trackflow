@@ -79,6 +79,8 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
       preload: path.join(app.getAppPath(), 'app', 'preload.js'),
       nodeIntegration: true,
       contextIsolation: true,
+       nodeIntegrationInWorker: true,
+
       webSecurity: false,
       ...options.webPreferences,
     },
@@ -86,7 +88,7 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
   win = new BrowserWindow(browserOptions);
 
   win.on('close', saveState);
-// createIPCHandler({ router: appRouter, windows: [win] });
+  // createIPCHandler({ router: appRouter, windows: [win] });
 
   return win;
 };
