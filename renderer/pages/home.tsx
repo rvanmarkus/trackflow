@@ -69,6 +69,10 @@ const Home: NextPage = () => {
           console.log(track, tracks);
           console.log("hier");
 
+          if (track.bpm){
+            continue
+          }
+
           optimisticTrackUpdate(track.filename, { isAnalyzing: true });
           try {
             const bpm = Number(
