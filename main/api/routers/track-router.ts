@@ -13,33 +13,51 @@ import { Track } from "../../track.types";
 import { app, dialog } from "electron";
 export const trackRouter = createTRPCRouter({
   getMusicFolder: publicProcedure.query(async () => {
-    const {filePaths} = await dialog.showOpenDialog({ properties: ['openDirectory'] });
-    return filePaths[0] ?? path.join(__dirname, '../../../music')
+    try {
+      const { filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+
+      return filePaths.length ? filePaths[0] : path.join(__dirname, '../music');
+    } catch (e) {
+      console.log(`error opening dialog ${e}`)
+
+    }
   }),
   getAllTracks: publicProcedure
     .input(z.string())
     .query(async ({ input: musicFolder }) => {
+      try {
+        const files = await readdir(musicFolder);
+        if (!files) return [];
+
+        const tracks: Track[] = [];
+        for (const file of files) {
+          const filename = path.join(musicFolder, file);
+          console.log(filename)
+          if (!(await lstat(filename)).isFile() || !filename.endsWith('.mp3') || filename.endsWith('.ffmpeg.mp3')) {
+            continue;
+          }
+          try {
+            const { title, artist, TBPM } = await readMetadata(filename);
+            tracks.push({
+              title: title ?? file,
+              filename: file,
+              ...artist ? { artist } : {},
+              ...TBPM ? { bpm: Number(TBPM) } : {},
+            });
+          } catch (e) {
+            console.log(`Error reading file ${file} ${e}`)
+          }
+        }
+        return tracks;
 
 
-      const files = await readdir(musicFolder);
-      if (!files) return [];
+      } catch (e) {
+        console.log('error reading folder')
 
-      const tracks: Track[] = [];
-      for (const file of files) {
-        const filename = path.join(musicFolder, file);
-        if (!filename.endsWith('.mp3') || filename.endsWith('.ffmpeg.mp3')) return;
-        if (!(await lstat(filename)).isFile()) return;
-
-        const { title, artist, TBPM } = await readMetadata(filename);
-        tracks.push({
-          title: title ?? file,
-          bpm: TBPM ? Number(TBPM) : undefined,
-          artist,
-          filename: file
-        });
+        // return e;
       }
 
-      return tracks;
+
     }),
   analyzeBpmForTrack: publicProcedure
     .input(z.object({ filename: z.string(), bpm: z.boolean(), move: z.boolean(), musicFolder: z.string() }))

@@ -13,9 +13,12 @@ const Home: NextPage = () => {
   // const [musicFolder, setMusicFolder] = useState<string | undefined>(
   //   "/Users/robbert/projects/trackflow/music"
   // );
-  const { data: musicFolder, refetch: openFolder } = api.example.getMusicFolder.useQuery(null, {
-    enabled: true,
-  });
+  const { data: musicFolder, refetch: askMusicFolder } =
+    api.example.getMusicFolder.useQuery(null, { enabled: false });
+  const openFolder = useCallback(() => {
+    console.log("opening folder");
+    askMusicFolder();
+  }, [askMusicFolder]);
   const {
     data: tracks,
     isError,
