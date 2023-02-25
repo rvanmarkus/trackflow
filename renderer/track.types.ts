@@ -1,5 +1,5 @@
 export interface Track {
-    filename: string;
+    filename?: string;
     title: string;
     artist?: string | undefined;
     bpm: number | undefined;

@@ -15,6 +15,17 @@ const Home: NextPage = () => {
   // );
   const { data: musicFolder, refetch: askMusicFolder } =
     api.example.getMusicFolder.useQuery(null, { enabled: false });
+  api.example.analyzeAllTracks.useSubscription(musicFolder, {
+    enabled: !!musicFolder,
+    onData: ({ filename, bpm }) => {
+      console.log(`received realtime update ${filename} ${bpm}`)
+      optimisticTrackUpdate(filename, {
+        bpm,
+        isAnalyzing: false,
+      });
+      // console.log("received", data);
+    },
+  });
   const openFolder = useCallback(() => {
     console.log("opening folder");
     askMusicFolder();
@@ -36,7 +47,7 @@ const Home: NextPage = () => {
   //   }
   // }, [])
   const formRef = useRef<HTMLFormElement>(null);
-  console.log(tracks)
+  console.log(tracks);
   const utils = api.useContext();
   const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
@@ -61,19 +72,19 @@ const Home: NextPage = () => {
       const formValues = {
         bpm: (form.elements.namedItem("bpm") as HTMLInputElement).checked,
         move: (form.elements.namedItem("move") as HTMLInputElement).checked,
+        multi: (form.elements.namedItem("multi") as HTMLInputElement).checked,
       };
       console.log({ formValues });
-
       void (async (formValues) => {
         for (const track of tracks) {
           console.log(track, tracks);
-          console.log("hier");
+          // console.log("hier");
 
           if (track.bpm){
             continue
           }
 
-          optimisticTrackUpdate(track.filename, { isAnalyzing: true });
+          // optimisticTrackUpdate(track.filename, { isAnalyzing: true });
           try {
             const bpm = Number(
               await analyzeBpm({
@@ -82,11 +93,6 @@ const Home: NextPage = () => {
                 ...formValues,
               })
             );
-
-            optimisticTrackUpdate(track.filename, {
-              bpm,
-              isAnalyzing: false,
-            });
           } catch (error) {
             console.log({ error });
           }
@@ -122,6 +128,10 @@ const Home: NextPage = () => {
               <input id="move" type="checkbox" name="move" />
               <label htmlFor="move">Move files</label>
             </div>
+            <div className="flex gap-2 p-4 text-xl text-white">
+              <input id="multi" type="checkbox" name="multi" />
+              <label htmlFor="multi">Multi-threading</label>
+            </div>
             <button
               type="submit"
               disabled={isAnalyzing}
@@ -137,7 +147,7 @@ const Home: NextPage = () => {
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          <TrackList tracks={tracks} />
+          <TrackList tracks={tracks as Track[]} />
         </div>
       </main>
     </>

@@ -4,6 +4,8 @@ import path from "path";
 import { z } from "zod";
 import { analyzeBpm } from "../../../helpers/bpm";
 import { readMetadata, writeMetadata } from "../../../helpers/mp3-meta";
+import { Track } from "../../../track.types";
+import { trackAnalyzer } from "../../trackAnalyzer";
 import { publicProcedure } from "../../trpc";
 
 export const analyzeBpmForTrack = publicProcedure
@@ -13,8 +15,9 @@ export const analyzeBpmForTrack = publicProcedure
         try {
             console.log(JSON.stringify({ filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, musicFolder }))
             const file = readFileSync(path.join(musicFolder, filename));
-    
+
             const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(path.join(musicFolder, filename)))?.TBPM);
+            trackAnalyzer.emit('trackAnalyzed', <Track>{ bpm: +bpm, filename, musicFolder, title: filename })
             if (shouldAnalyzeBpm) {
                 await writeMetadata(path.join(musicFolder, filename), { TBPM: bpm });
             }
@@ -26,7 +29,7 @@ export const analyzeBpmForTrack = publicProcedure
             }
             return bpm;
 
-        } catch(e) {
+        } catch (e) {
             console.log('error')
             console.log(e)
         }
