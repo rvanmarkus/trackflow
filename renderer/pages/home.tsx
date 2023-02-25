@@ -10,22 +10,19 @@ import { Track } from "../track.types";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  // const [musicFolder, setMusicFolder] = useState<string | undefined>(
-  //   "/Users/robbert/projects/trackflow/music"
-  // );
   const { data: musicFolder, refetch: askMusicFolder } =
     api.example.getMusicFolder.useQuery(null, { enabled: false });
-  api.example.analyzeAllTracks.useSubscription(musicFolder, {
+  api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
     enabled: !!musicFolder,
     onData: ({ filename, bpm }) => {
-      console.log(`received realtime update ${filename} ${bpm}`)
+      console.log(`received realtime update ${filename} ${bpm}`);
       optimisticTrackUpdate(filename, {
         bpm,
         isAnalyzing: false,
       });
-      // console.log("received", data);
     },
   });
+
   const openFolder = useCallback(() => {
     console.log("opening folder");
     askMusicFolder();
@@ -38,16 +35,10 @@ const Home: NextPage = () => {
   } = api.example.getAllTracks.useQuery(musicFolder, {
     enabled: !!musicFolder,
   });
-  const { mutateAsync: analyzeBpm, isLoading: isAnalyzing } =
-    api.example.analyzeBpmForTrack.useMutation();
-  // const openFolder = useCallback(() => {
+  const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing } =
+    api.example.analyzeAllTracks.useMutation();
 
-  //   if (filePaths) {
-  //     setMusicFolder(filePaths[0]);
-  //   }
-  // }, [])
   const formRef = useRef<HTMLFormElement>(null);
-  console.log(tracks);
   const utils = api.useContext();
   const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
@@ -76,30 +67,14 @@ const Home: NextPage = () => {
       };
       console.log({ formValues });
       void (async (formValues) => {
-        for (const track of tracks) {
-          console.log(track, tracks);
-          // console.log("hier");
-
-          if (track.bpm){
-            continue
-          }
-
-          // optimisticTrackUpdate(track.filename, { isAnalyzing: true });
-          try {
-            const bpm = Number(
-              await analyzeBpm({
-                filename: track.filename,
-                musicFolder,
-                ...formValues,
-              })
-            );
-          } catch (error) {
-            console.log({ error });
-          }
+        try {
+          await analyzeAllTracks({ ...formValues, musicFolder });
+        } catch (error) {
+          console.log({ error });
         }
       })(formValues);
     },
-    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeBpm, musicFolder]
+    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder]
   );
   return (
     <>
