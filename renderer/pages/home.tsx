@@ -10,18 +10,10 @@ import { Track } from "../track.types";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
+  const [progess, setProgress] = useState(0)
   const { data: musicFolder, refetch: askMusicFolder } =
     api.example.getMusicFolder.useQuery(null, { enabled: false });
-  api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
-    enabled: !!musicFolder,
-    onData: ({ filename, bpm }) => {
-      console.log(`received realtime update ${filename} ${bpm}`);
-      optimisticTrackUpdate(filename, {
-        bpm,
-        isAnalyzing: false,
-      });
-    },
-  });
+
 
   const openFolder = useCallback(() => {
     console.log("opening folder");
@@ -35,37 +27,50 @@ const Home: NextPage = () => {
   } = api.example.getAllTracks.useQuery(musicFolder, {
     enabled: !!musicFolder,
   });
+  
   const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing } =
-    api.example.analyzeAllTracks.useMutation();
-
+  api.example.analyzeAllTracks.useMutation();
+  
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useContext();
   const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
-      utils.example.getAllTracks.setData(undefined, (data) => {
-        if (!data) return;
-        return data.map((existing) => {
-          if (existing.filename === filename) {
-            return { ...existing, ...partial };
-          }
-          return existing;
-        });
-      }),
+    utils.example.getAllTracks.setData(undefined, (data) => {
+      if (!data) return;
+      return data.map((existing) => {
+        if (existing.filename === filename) {
+          return { ...existing, ...partial };
+        }
+        return existing;
+      });
+    }),
     [utils.example.getAllTracks]
-  );
-  const analyzeTracks = useCallback(
-    (event: SyntheticEvent<HTMLFormElement>) => {
+    );
+    const onTrackAnalyseFinish = useCallback(({ filename, bpm }: { filename?: string; bpm?: number; title?: string; artist?: string; isAnalyzing?: boolean; }): void => {
+      setProgress((progress) => progress + 1);
+      console.log(`received realtime update ${filename} ${bpm}`);
+      optimisticTrackUpdate(filename, {
+        bpm,
+        isAnalyzing: false,
+      });
+    }, [optimisticTrackUpdate, setProgress, tracks]);
+    
+    api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
+      enabled: !!musicFolder,
+      onData: onTrackAnalyseFinish,
+    });
+    console.log({ progess, tracks });
+    const analyzeTracks = useCallback(
+      (event: SyntheticEvent<HTMLFormElement>) => {
       const form = formRef.current;
       event.preventDefault();
-
+      setProgress(0)
       if (!form || isAnalyzing || !tracks) return;
 
       const formValues = {
         bpm: (form.elements.namedItem("bpm") as HTMLInputElement).checked,
         move: (form.elements.namedItem("move") as HTMLInputElement).checked,
-        multi: (form.elements.namedItem("multi") as HTMLInputElement).checked,
       };
-      console.log({ formValues });
       void (async (formValues) => {
         try {
           await analyzeAllTracks({ ...formValues, musicFolder });
@@ -74,7 +79,7 @@ const Home: NextPage = () => {
         }
       })(formValues);
     },
-    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder]
+    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
   );
   return (
     <>
@@ -103,21 +108,25 @@ const Home: NextPage = () => {
               <input id="move" type="checkbox" name="move" />
               <label htmlFor="move">Move files</label>
             </div>
-            <div className="flex gap-2 p-4 text-xl text-white">
-              <input id="multi" type="checkbox" name="multi" />
-              <label htmlFor="multi">Multi-threading</label>
-            </div>
             <button
               type="submit"
               disabled={isAnalyzing}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 ${
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${
                 isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
               }`}
             >
+  
               {isAnalyzing && <Spinner />}
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold z-10">
                 {isAnalyzing ? "Analyzing..." : "Analyze tracks →"}
               </h3>
+
+              <div className="z-0 absolute h-full bg-green-600 top-0 left-0" style={
+                {width: `${ (progess / tracks?.length ?? 0)*100}%`}
+              } >
+
+              </div>
+
             </button>
           </form>
           {/* </div> */}
