@@ -13,7 +13,11 @@ module.exports = {
       blue: colors.blue,
       ...colors
     },
-    extend: {},
+    extend: {
+      transitionProperty: {
+        'width': 'width'
+    },
+    },
   },
   plugins: [],
 };

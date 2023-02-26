@@ -28,7 +28,7 @@ const Home: NextPage = () => {
     enabled: !!musicFolder,
   });
   
-  const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing } =
+  const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing, isSuccess } =
   api.example.analyzeAllTracks.useMutation();
   
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,7 +51,7 @@ const Home: NextPage = () => {
       console.log(`received realtime update ${filename} ${bpm}`);
       optimisticTrackUpdate(filename, {
         bpm,
-        isAnalyzing: false,
+        isAnalyzing: true,
       });
     }, [optimisticTrackUpdate, setProgress, tracks]);
     
@@ -81,6 +81,7 @@ const Home: NextPage = () => {
     },
     [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
   );
+  const progressWidth = (progess / tracks?.length ?? 0) * 100;
   return (
     <>
       <Head>
@@ -118,11 +119,12 @@ const Home: NextPage = () => {
   
               {isAnalyzing && <Spinner />}
               <h3 className="text-2xl font-bold z-10">
-                {isAnalyzing ? "Analyzing..." : "Analyze tracks →"}
+                {isAnalyzing && "Analyzing..." }
+                {isSuccess ? <>Completed 	&#x2713; </>: "Scan tracks→" }
               </h3>
 
-              <div className="z-0 absolute h-full bg-green-600 top-0 left-0" style={
-                {width: `${ (progess / tracks?.length ?? 0)*100}%`}
+              <div className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width" style={
+                {width: `${ isAnalyzing ? progressWidth : 0}%`}
               } >
 
               </div>
