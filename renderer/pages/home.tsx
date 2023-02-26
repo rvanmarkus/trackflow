@@ -119,8 +119,8 @@ const Home: NextPage = () => {
   
               {isAnalyzing && <Spinner />}
               <h3 className="text-2xl font-bold z-10">
-                {isAnalyzing && "Analyzing..." }
-                {isSuccess ? <>Completed 	&#x2713; </>: "Scan tracks→" }
+                
+                {isSuccess ? <>Completed 	&#x2713; </>: isAnalyzing ? "Scanning tracks..." : "Scan tracks→" }
               </h3>
 
               <div className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width" style={
