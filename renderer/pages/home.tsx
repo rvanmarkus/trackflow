@@ -82,6 +82,7 @@ const Home: NextPage = () => {
     [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
   );
   const progressWidth = (progess / tracks?.length ?? 0) * 100;
+  const Seperator = () => (<div className="w-[2px] bg-white h-4 m-0 rounded"></div>)
   return (
     <>
       <Head>
@@ -100,7 +101,23 @@ const Home: NextPage = () => {
             ref={formRef}
             className="flex flex-col items-center justify-center"
           >
-            <button onClick={openFolder}>Open folder</button>
+            <legend className="flex flex-col items-center p-4">
+              
+
+              <div className="bg-white/50 border-dashed border-2 p-12 text-center flex gap-4">
+              <label className="font-sans text-xl">Drag and drop your music files <span className="italic">or</span></label>
+                <button onClick={openFolder} className="uppercase bg-green-700 p-2 text-sm">Open folder</button>
+              </div>
+            </legend>
+            <Seperator />
+            <legend className="flex flex-col items-center p-4">
+              {/* <label className="font-sans text-xl mt-0">Out</label> */}
+                <button onClick={openFolder} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">Select destination folder </button>
+            </legend>
+            <Seperator />
+
+{/* 
+
             <div className="flex gap-2 p-4 text-xl text-white">
               <input id="bpm" type="checkbox" name="bpm" />
               <label htmlFor="bpm">Analyse BPM</label>
@@ -108,7 +125,8 @@ const Home: NextPage = () => {
             <div className="flex gap-2 p-4 text-xl text-white">
               <input id="move" type="checkbox" name="move" />
               <label htmlFor="move">Move files</label>
-            </div>
+            </div> */}
+
             <button
               type="submit"
               disabled={isAnalyzing}
