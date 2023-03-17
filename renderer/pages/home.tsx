@@ -139,7 +139,7 @@ const Home: NextPage = () => {
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          <TrackList tracks={tracks as Track[]} />
+          <TrackList tracks={tracks as Track[]} musicFolder={musicFolder} />
         </div>
       </main>
     </>
