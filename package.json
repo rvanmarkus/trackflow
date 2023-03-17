@@ -9,7 +9,9 @@
     "dev": "nextron",
     "build": "nextron build",
     "lint": "next lint",
-    "postinstall": "electron-builder install-app-deps && npx prisma generate"
+    "postinstall": "electron-builder install-app-deps && npx prisma generate",
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "electron-serve": "^1.1.0",

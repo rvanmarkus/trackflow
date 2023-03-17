@@ -18,9 +18,11 @@ export const analyzeBpmForTrack = publicProcedure
 
             const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(path.join(musicFolder, filename)))?.TBPM);
             trackAnalyzer.emit('trackAnalyzed', <Track>{ bpm: +bpm, filename, musicFolder, title: filename })
+
             if (shouldAnalyzeBpm) {
                 await writeMetadata(path.join(musicFolder, filename), { TBPM: bpm });
             }
+            
             if (shouldMoveFiles) {
                 if (!existsSync(path.join(musicFolder, bpm))) {
                     await mkdir(path.join(musicFolder, bpm));

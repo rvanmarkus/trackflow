@@ -10,10 +10,9 @@ import { Track } from "../track.types";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  const [progess, setProgress] = useState(0)
-  const { data: musicFolder, refetch: askMusicFolder } =
-    api.example.getMusicFolder.useQuery(null, { enabled: false });
-
+  const [progess, setProgress] = useState(0);
+  const { data: musicFolder, mutate: askMusicFolder } =
+    api.example.getMusicFolder.useMutation();
 
   const openFolder = useCallback(() => {
     console.log("opening folder");
@@ -27,48 +26,63 @@ const Home: NextPage = () => {
   } = api.example.getAllTracks.useQuery(musicFolder, {
     enabled: !!musicFolder,
   });
-  
-  const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing, isSuccess } =
-  api.example.analyzeAllTracks.useMutation();
-  
+
+  const {
+    mutateAsync: analyzeAllTracks,
+    isLoading: isAnalyzing,
+    isSuccess,
+  } = api.example.analyzeAllTracks.useMutation();
+
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useContext();
   const optimisticTrackUpdate = useCallback(
     (filename: string, partial: Partial<Track>) =>
-    utils.example.getAllTracks.setData(undefined, (data) => {
-      if (!data) return;
-      return data.map((existing) => {
-        if (existing.filename === filename) {
-          return { ...existing, ...partial };
-        }
-        return existing;
-      });
-    }),
+      utils.example.getAllTracks.setData(undefined, (data) => {
+        if (!data) return;
+        return data.map((existing) => {
+          if (existing.filename === filename) {
+            return { ...existing, ...partial };
+          }
+          return existing;
+        });
+      }),
     [utils.example.getAllTracks]
-    );
-    const onTrackAnalyseFinish = useCallback(({ filename, bpm }: { filename?: string; bpm?: number; title?: string; artist?: string; isAnalyzing?: boolean; }): void => {
+  );
+  const onTrackAnalyseFinish = useCallback(
+    ({
+      filename,
+      bpm,
+    }: {
+      filename?: string;
+      bpm?: number;
+      title?: string;
+      artist?: string;
+      isAnalyzing?: boolean;
+    }): void => {
       setProgress((progress) => progress + 1);
       console.log(`received realtime update ${filename} ${bpm}`);
       optimisticTrackUpdate(filename, {
         bpm,
         isAnalyzing: true,
       });
-    }, [optimisticTrackUpdate, setProgress, tracks]);
-    
-    api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
-      enabled: !!musicFolder,
-      onData: onTrackAnalyseFinish,
-    });
-    console.log({ progess, tracks });
-    const analyzeTracks = useCallback(
-      (event: SyntheticEvent<HTMLFormElement>) => {
+    },
+    [optimisticTrackUpdate, setProgress, tracks]
+  );
+
+  api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
+    enabled: !!musicFolder,
+    onData: onTrackAnalyseFinish,
+  });
+  console.log({ progess, tracks });
+  const analyzeTracks = useCallback(
+    (event: SyntheticEvent<HTMLFormElement>) => {
       const form = formRef.current;
       event.preventDefault();
-      setProgress(0)
+      setProgress(0);
       if (!form || isAnalyzing || !tracks) return;
 
       const formValues = {
-        keepOriginalFiles: false
+        keepOriginalFiles: false,
       };
       void (async (formValues) => {
         try {
@@ -78,10 +92,19 @@ const Home: NextPage = () => {
         }
       })(formValues);
     },
-  [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
+    [
+      isAnalyzing,
+      tracks,
+      optimisticTrackUpdate,
+      analyzeAllTracks,
+      musicFolder,
+      setProgress,
+    ]
   );
   const progressWidth = (progess / tracks?.length ?? 0) * 100;
-  const Seperator = () => (<div className="w-[2px] bg-white h-4 m-0 rounded"></div>)
+  const Seperator = () => (
+    <div className="w-[2px] bg-white h-4 m-0 rounded"></div>
+  );
   return (
     <>
       <Head>
@@ -101,11 +124,17 @@ const Home: NextPage = () => {
             className="flex flex-col items-center justify-center"
           >
             <legend className="flex flex-col items-center p-4">
-              
-
               <div className="bg-white/50 border-dashed border-2 p-12 text-center flex gap-4">
-              <label className="font-sans text-xl">Drag and drop your music files <span className="italic">or</span></label>
-                <button onClick={openFolder} className="uppercase bg-green-700 p-2 text-sm">Open folder</button>
+                <label className="font-sans text-xl">
+                  Drag and drop your music files{" "}
+                  <span className="italic">or</span>
+                </label>
+                <button
+                  onClick={openFolder}
+                  className="uppercase bg-green-700 p-2 text-sm"
+                >
+                  Open folder
+                </button>
               </div>
             </legend>
             {/* <Seperator /> */}
@@ -122,19 +151,21 @@ const Home: NextPage = () => {
                 isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
               }`}
             >
-  
               {isAnalyzing && <Spinner />}
               <h3 className="text-2xl font-bold z-10">
-                
-                {isSuccess ? <>Completed 	&#x2713; </>: isAnalyzing ? "Scanning tracks..." : "Scan tracks→" }
+                {isSuccess ? (
+                  <>Completed &#x2713; </>
+                ) : isAnalyzing ? (
+                  "Scanning tracks..."
+                ) : (
+                  "Scan tracks→"
+                )}
               </h3>
 
-              <div className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width" style={
-                {width: `${ isAnalyzing ? progressWidth : 0}%`}
-              } >
-
-              </div>
-
+              <div
+                className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width"
+                style={{ width: `${isAnalyzing ? progressWidth : 0}%` }}
+              ></div>
             </button>
           </form>
           {/* </div> */}
