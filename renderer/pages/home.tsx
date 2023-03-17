@@ -68,8 +68,7 @@ const Home: NextPage = () => {
       if (!form || isAnalyzing || !tracks) return;
 
       const formValues = {
-        bpm: (form.elements.namedItem("bpm") as HTMLInputElement).checked,
-        move: (form.elements.namedItem("move") as HTMLInputElement).checked,
+        keepOriginalFiles: false
       };
       void (async (formValues) => {
         try {
@@ -79,7 +78,7 @@ const Home: NextPage = () => {
         }
       })(formValues);
     },
-    [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
+  [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
   );
   const progressWidth = (progess / tracks?.length ?? 0) * 100;
   const Seperator = () => (<div className="w-[2px] bg-white h-4 m-0 rounded"></div>)
@@ -109,23 +108,12 @@ const Home: NextPage = () => {
                 <button onClick={openFolder} className="uppercase bg-green-700 p-2 text-sm">Open folder</button>
               </div>
             </legend>
-            <Seperator />
-            <legend className="flex flex-col items-center p-4">
-              {/* <label className="font-sans text-xl mt-0">Out</label> */}
+            {/* <Seperator /> */}
+            {/* <legend className="flex flex-col items-center p-4">
+             
                 <button onClick={openFolder} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">Select destination folder </button>
-            </legend>
+            </legend> */}
             <Seperator />
-
-{/* 
-
-            <div className="flex gap-2 p-4 text-xl text-white">
-              <input id="bpm" type="checkbox" name="bpm" />
-              <label htmlFor="bpm">Analyse BPM</label>
-            </div>
-            <div className="flex gap-2 p-4 text-xl text-white">
-              <input id="move" type="checkbox" name="move" />
-              <label htmlFor="move">Move files</label>
-            </div> */}
 
             <button
               type="submit"

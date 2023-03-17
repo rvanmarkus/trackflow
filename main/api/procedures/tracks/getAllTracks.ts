@@ -17,7 +17,12 @@ export const getAllTracks = publicProcedure
       for (const file of files) {
         const filename = path.join(musicFolder, file);
         console.log(filename);
-        if (!(await lstat(filename)).isFile() || !filename.endsWith('.mp3') || filename.endsWith('.ffmpeg.mp3')) {
+        if (
+            !(await lstat(filename)).isFile() ||
+            !filename.endsWith('.mp3') ||
+            filename.endsWith('.ffmpeg.mp3') ||
+            filename.startsWith('.')
+          ) {
           continue;
         }
         try {
