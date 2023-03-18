@@ -56,7 +56,7 @@ import superjson from "superjson";
 import { CreateContextOptions } from "electron-trpc/main";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  // transformer: superjson,
+  transformer: { serialize: (input) => input, deserialize: (input) => input },
   errorFormatter({ shape }) {
     return shape;
   }

@@ -11,7 +11,7 @@ import { api } from "../utils/api";
 
 const Home: NextPage = () => {
   const [progess, setProgress] = useState(0);
-  const { data: musicFolder, mutate: askMusicFolder } =
+  const { mutate: askMusicFolder } =
     api.example.addTrackFiles.useMutation();
 
   const openFolder = useCallback(() => {
@@ -23,7 +23,7 @@ const Home: NextPage = () => {
     isError,
     error,
     isLoading: isLoadingTracks,
-  } = api.example.getAllTracks.useQuery(musicFolder);
+  } = api.example.getAllTracks.useQuery();
 
   const {
     mutateAsync: analyzeAllTracks,
@@ -43,7 +43,7 @@ const Home: NextPage = () => {
           }
           return existing;
         });
-      }),
+      } ),
     [utils.example.getAllTracks]
   );
   const onTrackAnalyseFinish = useCallback(
@@ -66,8 +66,7 @@ const Home: NextPage = () => {
     [optimisticTrackUpdate, setProgress, tracks]
   );
 
-  api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
-    enabled: !!musicFolder,
+  api.example.trackAnalyseUpdates.useSubscription(undefined, {
     onData: onTrackAnalyseFinish,
   });
   console.log({ progess, tracks });
@@ -83,7 +82,7 @@ const Home: NextPage = () => {
       };
       void (async (formValues) => {
         try {
-          await analyzeAllTracks({ ...formValues, musicFolder });
+          await analyzeAllTracks({ ...formValues });
         } catch (error) {
           console.log({ error });
         }
@@ -94,7 +93,6 @@ const Home: NextPage = () => {
       tracks,
       optimisticTrackUpdate,
       analyzeAllTracks,
-      musicFolder,
       setProgress,
     ]
   );
@@ -128,6 +126,7 @@ const Home: NextPage = () => {
                 </label>
                 <button
                   onClick={openFolder}
+                  type="button"
                   className="uppercase bg-green-700 p-2 text-sm"
                 >
                   Open folder
@@ -144,9 +143,8 @@ const Home: NextPage = () => {
             <button
               type="submit"
               disabled={isAnalyzing}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${
-                isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
-              }`}
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
+                }`}
             >
               {isAnalyzing && <Spinner />}
               <h3 className="text-2xl font-bold z-10">
@@ -167,7 +165,7 @@ const Home: NextPage = () => {
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          <TrackList tracks={tracks as Track[]} musicFolder={musicFolder} />
+          <TrackList tracks={tracks as Track[]} />
         </div>
       </main>
     </>

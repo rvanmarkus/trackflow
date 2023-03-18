@@ -7,15 +7,14 @@ import { Track } from "@prisma/client";
 
 export const TrackList: FunctionComponent<{
   tracks: Track[] | undefined;
-  musicFolder: string | undefined;
-}> = ({ tracks, musicFolder }) => {
+}> = ({ tracks }) => {
   const { mutate: openFileInFolder } =
     api.example.openFileInFolder.useMutation();
   const onOpenFileInFolder = useCallback(
     (filename: string) => {
-      openFileInFolder({ filename, musicFolder });
+      openFileInFolder({ filename });
     },
-    [openFileInFolder, musicFolder]
+    [openFileInFolder]
   );
   if (!tracks) return <h3>select tracks...</h3>;
 
