@@ -5,6 +5,7 @@ import { readdir, lstat } from "fs/promises";
 import { z } from "zod";
 import { readMetadata } from "../../../helpers/mp3-meta";
 import { Track } from "@prisma/client";
+import { readdirSync } from "fs";
 
 export const addMusicFolder = publicProcedure.query(
   async ({ ctx: { prisma } }) => {
@@ -16,12 +17,11 @@ export const addMusicFolder = publicProcedure.query(
       const musicFolder = filePaths?.[0];
       if (!musicFolder) throw new Error("No folder selected");
 
-      const files = await readdir(musicFolder);
+      const files = readdirSync(musicFolder).map(file => path.join(musicFolder, file));
       if (!files) return [];
 
-      const tracks: [] = [];
-      for (const file of files) {
-        const filename = path.join(musicFolder, file);
+      const tracks: Track[] = [];
+      for (const filename of files) {
         console.log(filename);
         if (
           !(await lstat(filename)).isFile() ||
@@ -33,14 +33,14 @@ export const addMusicFolder = publicProcedure.query(
         }
         try {
           const { title, artist, TBPM } = await readMetadata(filename);
-          const track = prisma.track.create({
+          const track = await prisma.track.create({
             data: {
-              title: title ?? file,
-              file: file,
+              title: title ?? filename,
+              file: filename,
               ...(TBPM ? { bpm: Number(TBPM) } : {}),
             },
           });
-          tracks.push(tracks);
+          tracks.push(track);
         } catch (e) {
           console.log(`Error reading file ${filename} ${e}`);
         }

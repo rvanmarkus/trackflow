@@ -1,3 +1,4 @@
+import { Track } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { type NextPage } from "next";
 import Head from "next/head";
@@ -5,14 +6,13 @@ import Link from "next/link";
 import { SyntheticEvent, useCallback, useRef, useState } from "react";
 import { Spinner } from "../components/spinner";
 import { TrackList } from "../components/track-list";
-import { Track } from "../track.types";
 
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
   const [progess, setProgress] = useState(0);
   const { data: musicFolder, mutate: askMusicFolder } =
-    api.example.getMusicFolder.useMutation();
+    api.example.addTrackFiles.useMutation();
 
   const openFolder = useCallback(() => {
     console.log("opening folder");
@@ -23,9 +23,7 @@ const Home: NextPage = () => {
     isError,
     error,
     isLoading: isLoadingTracks,
-  } = api.example.getAllTracks.useQuery(musicFolder, {
-    enabled: !!musicFolder,
-  });
+  } = api.example.getAllTracks.useQuery(musicFolder);
 
   const {
     mutateAsync: analyzeAllTracks,
@@ -40,7 +38,7 @@ const Home: NextPage = () => {
       utils.example.getAllTracks.setData(undefined, (data) => {
         if (!data) return;
         return data.map((existing) => {
-          if (existing.filename === filename) {
+          if (existing.file === filename) {
             return { ...existing, ...partial };
           }
           return existing;
@@ -63,7 +61,6 @@ const Home: NextPage = () => {
       console.log(`received realtime update ${filename} ${bpm}`);
       optimisticTrackUpdate(filename, {
         bpm,
-        isAnalyzing: true,
       });
     },
     [optimisticTrackUpdate, setProgress, tracks]

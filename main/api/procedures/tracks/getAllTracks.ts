@@ -1,11 +1,6 @@
 import { publicProcedure } from "../../trpc";
 
 export const getAllTracks = publicProcedure
-  .input(z.string())
-  .query(async ({ input: musicFolder }) => {
-   
-
-
-  });
-
-}
+  .query(async ({ ctx: { prisma } }) => {
+    return prisma.track.findMany({ orderBy: [{ bpm: 'asc' }] })
+  })
