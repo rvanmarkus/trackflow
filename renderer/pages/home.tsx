@@ -84,7 +84,7 @@ const Home: NextPage = () => {
       };
       void (async (formValues) => {
         try {
-          await analyzeAllTracks({ ...formValues });
+          await analyzeAllTracks({ ...formValues, outputFolder });
         } catch (error) {
           console.log({ error });
         }

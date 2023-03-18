@@ -28,7 +28,7 @@ export const TrackList: FunctionComponent<{
           >
             <a
               className="rounded bg-white/20 p-3 text-white"
-              onClick={() => onOpenFileInFolder(file.file)}
+              onClick={() => onOpenFileInFolder(file.path)}
             >
               {file.title}
             </a>
