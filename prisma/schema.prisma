@@ -13,6 +13,7 @@ datasource db {
 model Track {
     id        String   @id @default(cuid())
     file      String
+    path      String
     title     String @unique
     bpm       Int?
     createdAt DateTime @default(now())

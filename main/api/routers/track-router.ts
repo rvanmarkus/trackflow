@@ -8,6 +8,7 @@ import { trackAnalyseUpdates } from "../procedures/tracks/trackAnalyseUpdates";
 import { analyzeAllTracks } from "../procedures/tracks/analyzeAllTracks";
 import { openFileInFolder } from "../procedures/tracks/openFileInFolder";
 import { addTrackFiles } from "../procedures/tracks/addTrackFiles";
+import { getOutputFolder } from "../procedures/tracks/addOutputFolder";
 
 
 
@@ -18,6 +19,7 @@ export const trackRouter = createTRPCRouter({
   analyzeBpmForTrack,
   trackAnalyseUpdates: trackAnalyseUpdates,
   analyzeAllTracks,
-  openFileInFolder
+  openFileInFolder,
+  getOutputFolder
 });
 

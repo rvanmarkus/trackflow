@@ -13,6 +13,8 @@ const Home: NextPage = () => {
   const [progess, setProgress] = useState(0);
   const { mutate: askMusicFolder } =
     api.example.addTrackFiles.useMutation();
+  const { refetch: getOutputFolder, data: outputFolder } =
+    api.example.getOutputFolder.useQuery(undefined, { enabled: false });
 
   const openFolder = useCallback(() => {
     console.log("opening folder");
@@ -43,7 +45,7 @@ const Home: NextPage = () => {
           }
           return existing;
         });
-      } ),
+      }),
     [utils.example.getAllTracks]
   );
   const onTrackAnalyseFinish = useCallback(
@@ -133,11 +135,11 @@ const Home: NextPage = () => {
                 </button>
               </div>
             </legend>
-            {/* <Seperator /> */}
-            {/* <legend className="flex flex-col items-center p-4">
-             
-                <button onClick={openFolder} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">Select destination folder </button>
-            </legend> */}
+            <Seperator />
+            <legend className="flex flex-col items-center p-4">
+
+              <button onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
+            </legend>
             <Seperator />
 
             <button
