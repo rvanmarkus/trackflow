@@ -8,18 +8,13 @@ import { Spinner } from "../components/spinner";
 import { TrackList } from "../components/track-list";
 
 import { api } from "../utils/api";
+import { TracksInput } from "../components/tracks-input";
 
 const Home: NextPage = () => {
   const [progess, setProgress] = useState(0);
-  const { mutate: askMusicFolder } =
-    api.example.addTrackFiles.useMutation();
   const { refetch: getOutputFolder, data: outputFolder } =
     api.example.getOutputFolder.useQuery(undefined, { enabled: false });
 
-  const openFolder = useCallback(() => {
-    console.log("opening folder");
-    askMusicFolder();
-  }, [askMusicFolder]);
   const {
     data: tracks,
     isError,
@@ -35,19 +30,7 @@ const Home: NextPage = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useContext();
-  const optimisticTrackUpdate = useCallback(
-    (filename: string, partial: Partial<Track>) =>
-      utils.example.getAllTracks.setData(undefined, (data) => {
-        if (!data) return;
-        return data.map((existing) => {
-          if (existing.file === filename) {
-            return { ...existing, ...partial };
-          }
-          return existing;
-        });
-      }),
-    [utils.example.getAllTracks]
-  );
+  
   const onTrackAnalyseFinish = useCallback(
     ({
       filename,
@@ -61,11 +44,8 @@ const Home: NextPage = () => {
     }): void => {
       setProgress((progress) => progress + 1);
       console.log(`received realtime update ${filename} ${bpm}`);
-      optimisticTrackUpdate(filename, {
-        bpm,
-      });
     },
-    [optimisticTrackUpdate, setProgress, tracks]
+    [setProgress, tracks]
   );
 
   api.example.trackAnalyseUpdates.useSubscription(undefined, {
@@ -93,7 +73,6 @@ const Home: NextPage = () => {
     [
       isAnalyzing,
       tracks,
-      optimisticTrackUpdate,
       analyzeAllTracks,
       setProgress,
     ]
@@ -118,23 +97,9 @@ const Home: NextPage = () => {
           <form
             onSubmit={analyzeTracks}
             ref={formRef}
-            className="flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center w-full"
           >
-            <legend className="flex flex-col items-center p-4">
-              <div className="bg-white/50 border-dashed border-2 p-12 text-center flex gap-4">
-                <label className="font-sans text-xl">
-                  Drag and drop your music files{" "}
-                  <span className="italic">or</span>
-                </label>
-                <button
-                  onClick={openFolder}
-                  type="button"
-                  className="uppercase bg-green-700 p-2 text-sm"
-                >
-                  Open folder
-                </button>
-              </div>
-            </legend>
+            <TracksInput />
             <Seperator />
             <legend className="flex flex-col items-center p-4">
 
@@ -167,7 +132,7 @@ const Home: NextPage = () => {
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          <TrackList tracks={tracks as Track[]} />
+          {/* <TrackList tracks={tracks} /> */}
         </div>
       </main>
     </>

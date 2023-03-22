@@ -7,7 +7,7 @@ export function readMetadata(filename: string): Promise<Record<string, string>> 
     return new Promise((resolve, reject) => {
         ffmetadata.read(filename, function (err: Error, data: any) {
             if (err)
-                reject(err);
+                reject(new Error(`Error reading metadata for file: ${filename} Error: ${err}`));
             else
                 resolve(data as Record<string, any>);
         });
