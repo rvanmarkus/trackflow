@@ -12,6 +12,7 @@ export const TracksInput: React.FunctionComponent = () => {
     console.log("opening folder");
     addTracks();
   }, [addTracks]);
+  const { mutate: clearAllTracks, isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
 
   const [isDragging, setDragging] = useState<boolean>()
 
@@ -29,8 +30,13 @@ export const TracksInput: React.FunctionComponent = () => {
       event.stopPropagation();
       console.log('File droppp')
       setDragging(false)
-      await addTracks(Array.from<{ path: string }>((event as unknown as any).dataTransfer.files).map(f => f.path))
-      refetch()
+      try {
+        await addTracks(Array.from<{ path: string }>((event as unknown as any).dataTransfer.files).map(f => f.path))
+      }
+      catch (e) { }
+      finally {
+        refetch()
+      }
     }
     const onDragOver = (event: DragEvent) => {
       event.preventDefault();
@@ -62,7 +68,18 @@ export const TracksInput: React.FunctionComponent = () => {
       </label>
       </>}
 
-      <h2>{isLoadingTracks ? 'Loading tracks...' : `${tracks.length} Tracks`}</h2>
+      {!isDragging && tracks?.length ?<h2>
+        {isLoadingTracks ? 'Loading tracks... ' : `${tracks?.length} Tracks `}
+        <button
+          type="button"
+          disabled={isDeleting || !tracks?.length}
+          className="rounded p-3 disabled:bg-red-100 bg-red-600 text-white  disabled:text-red-300"
+          onClick={() => clearAllTracks()}>
+          X
+        </button>
+
+      </h2> : ""}
+
     </div>
   </legend>);
 };
