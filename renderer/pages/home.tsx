@@ -138,14 +138,14 @@ const Home: NextPage = () => {
             <Seperator />
             <legend className="flex flex-col items-center p-4">
 
-              <button onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
+              <button type="button" onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
             </legend>
             <Seperator />
 
             <button
               type="submit"
-              disabled={isAnalyzing}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
+              disabled={isAnalyzing || !outputFolder}
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "cursor-wait opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}
