@@ -4,10 +4,10 @@ import { Track } from "../../../track.types";
 import { trackRouter } from "../../routers/track-router";
 import { publicProcedure } from "../../trpc";
 
-export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFiles: z.boolean(), musicFolder: z.string() }))
-    .mutation(async ({ input: { musicFolder, keepOriginalFiles }, ctx }) => {
+export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFiles: z.boolean(), outputFolder: z.string()}))
+    .mutation(async ({ input: { keepOriginalFiles, outputFolder }, ctx }) => {
         const caller = trackRouter.createCaller(ctx);
-        const tracks = await caller.getAllTracks(musicFolder)
+        const tracks = await caller.getAllTracks()
 
         const analyzedTracks: string[] = [];
 
@@ -15,10 +15,10 @@ export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFil
             console.log(track, tracks);
             try {
                 analyzedTracks.push((await caller.analyzeBpmForTrack({
-                    filename: track.filename,
-                    musicFolder,
+                    id: track.id,
                     bpm: !Boolean(track.bpm),
                     move: !keepOriginalFiles,
+                    outputFolder
                 })))
 
                 

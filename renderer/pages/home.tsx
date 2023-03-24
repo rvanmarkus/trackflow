@@ -1,3 +1,4 @@
+import { Track } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { type NextPage } from "next";
 import Head from "next/head";
@@ -5,83 +6,81 @@ import Link from "next/link";
 import { SyntheticEvent, useCallback, useRef, useState } from "react";
 import { Spinner } from "../components/spinner";
 import { TrackList } from "../components/track-list";
-import { Track } from "../track.types";
 
 import { api } from "../utils/api";
+import { TracksInput } from "../components/tracks-input";
 
 const Home: NextPage = () => {
-  const [progess, setProgress] = useState(0)
-  const { data: musicFolder, refetch: askMusicFolder } =
-    api.example.getMusicFolder.useQuery(null, { enabled: false });
+  const [progess, setProgress] = useState(0);
+  const { refetch: getOutputFolder, data: outputFolder } =
+    api.example.getOutputFolder.useQuery(undefined, { enabled: false });
 
-
-  const openFolder = useCallback(() => {
-    console.log("opening folder");
-    askMusicFolder();
-  }, [askMusicFolder]);
   const {
     data: tracks,
     isError,
     error,
     isLoading: isLoadingTracks,
-  } = api.example.getAllTracks.useQuery(musicFolder, {
-    enabled: !!musicFolder,
-  });
-  
-  const { mutateAsync: analyzeAllTracks, isLoading: isAnalyzing, isSuccess } =
-  api.example.analyzeAllTracks.useMutation();
-  
+  } = api.example.getAllTracks.useQuery();
+
+  const {
+    mutateAsync: analyzeAllTracks,
+    isLoading: isAnalyzing,
+    isSuccess,
+  } = api.example.analyzeAllTracks.useMutation();
+
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useContext();
-  const optimisticTrackUpdate = useCallback(
-    (filename: string, partial: Partial<Track>) =>
-    utils.example.getAllTracks.setData(undefined, (data) => {
-      if (!data) return;
-      return data.map((existing) => {
-        if (existing.filename === filename) {
-          return { ...existing, ...partial };
-        }
-        return existing;
-      });
-    }),
-    [utils.example.getAllTracks]
-    );
-    const onTrackAnalyseFinish = useCallback(({ filename, bpm }: { filename?: string; bpm?: number; title?: string; artist?: string; isAnalyzing?: boolean; }): void => {
+  
+  const onTrackAnalyseFinish = useCallback(
+    ({
+      filename,
+      bpm,
+    }: {
+      filename?: string;
+      bpm?: number;
+      title?: string;
+      artist?: string;
+      isAnalyzing?: boolean;
+    }): void => {
       setProgress((progress) => progress + 1);
       console.log(`received realtime update ${filename} ${bpm}`);
-      optimisticTrackUpdate(filename, {
-        bpm,
-        isAnalyzing: true,
-      });
-    }, [optimisticTrackUpdate, setProgress, tracks]);
-    
-    api.example.trackAnalyseUpdates.useSubscription(musicFolder, {
-      enabled: !!musicFolder,
-      onData: onTrackAnalyseFinish,
-    });
-    console.log({ progess, tracks });
-    const analyzeTracks = useCallback(
-      (event: SyntheticEvent<HTMLFormElement>) => {
+    },
+    [setProgress, tracks]
+  );
+
+  api.example.trackAnalyseUpdates.useSubscription(undefined, {
+    onData: onTrackAnalyseFinish,
+  });
+  console.log({ progess, tracks });
+  const analyzeTracks = useCallback(
+    (event: SyntheticEvent<HTMLFormElement>) => {
       const form = formRef.current;
       event.preventDefault();
-      setProgress(0)
+      setProgress(0);
       if (!form || isAnalyzing || !tracks) return;
 
       const formValues = {
-        keepOriginalFiles: false
+        keepOriginalFiles: false,
       };
       void (async (formValues) => {
         try {
-          await analyzeAllTracks({ ...formValues, musicFolder });
+          await analyzeAllTracks({ ...formValues, outputFolder });
         } catch (error) {
           console.log({ error });
         }
       })(formValues);
     },
-  [isAnalyzing, tracks, optimisticTrackUpdate, analyzeAllTracks, musicFolder, setProgress]
+    [
+      isAnalyzing,
+      tracks,
+      analyzeAllTracks,
+      setProgress,
+    ]
   );
   const progressWidth = (progess / tracks?.length ?? 0) * 100;
-  const Seperator = () => (<div className="w-[2px] bg-white h-4 m-0 rounded"></div>)
+  const Seperator = () => (
+    <div className="w-[2px] bg-white h-4 m-0 rounded"></div>
+  );
   return (
     <>
       <Head>
@@ -98,48 +97,42 @@ const Home: NextPage = () => {
           <form
             onSubmit={analyzeTracks}
             ref={formRef}
-            className="flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center w-full"
           >
+            <TracksInput />
+            <Seperator />
             <legend className="flex flex-col items-center p-4">
-              
 
-              <div className="bg-white/50 border-dashed border-2 p-12 text-center flex gap-4">
-              <label className="font-sans text-xl">Drag and drop your music files <span className="italic">or</span></label>
-                <button onClick={openFolder} className="uppercase bg-green-700 p-2 text-sm">Open folder</button>
-              </div>
+              <button type="button" onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
             </legend>
-            {/* <Seperator /> */}
-            {/* <legend className="flex flex-col items-center p-4">
-             
-                <button onClick={openFolder} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">Select destination folder </button>
-            </legend> */}
             <Seperator />
 
             <button
               type="submit"
-              disabled={isAnalyzing}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${
-                isAnalyzing || isLoadingTracks ? "cursor-wait" : ""
-              }`}
+              disabled={isAnalyzing || !outputFolder}
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "cursor-wait opacity-50" : ""
+                }`}
             >
-  
               {isAnalyzing && <Spinner />}
               <h3 className="text-2xl font-bold z-10">
-                
-                {isSuccess ? <>Completed 	&#x2713; </>: isAnalyzing ? "Scanning tracks..." : "Scan tracks→" }
+                {isSuccess ? (
+                  <>Completed &#x2713; </>
+                ) : isAnalyzing ? (
+                  "Scanning tracks..."
+                ) : (
+                  "Scan tracks→"
+                )}
               </h3>
 
-              <div className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width" style={
-                {width: `${ isAnalyzing ? progressWidth : 0}%`}
-              } >
-
-              </div>
-
+              <div
+                className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width"
+                style={{ width: `${isAnalyzing ? progressWidth : 0}%` }}
+              ></div>
             </button>
           </form>
           {/* </div> */}
           {isError && <p>{error.message}</p>}
-          <TrackList tracks={tracks as Track[]} musicFolder={musicFolder} />
+          {/* <TrackList tracks={tracks} /> */}
         </div>
       </main>
     </>

@@ -10,8 +10,12 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
+model Track {
     id        String   @id @default(cuid())
+    file      String
+    path      String
+    title     String @unique
+    bpm       Int?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }

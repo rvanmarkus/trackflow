@@ -1,21 +1,20 @@
 import { FunctionComponent } from "react";
-import { Track } from "../track.types";
 import { api } from "../utils/api";
 import { Spinner } from "./spinner";
 import { useCallback } from "react";
 import path from "path";
+import { Track } from "@prisma/client";
 
 export const TrackList: FunctionComponent<{
   tracks: Track[] | undefined;
-  musicFolder: string | undefined;
-}> = ({ tracks, musicFolder }) => {
+}> = ({ tracks }) => {
   const { mutate: openFileInFolder } =
     api.example.openFileInFolder.useMutation();
   const onOpenFileInFolder = useCallback(
     (filename: string) => {
-      openFileInFolder({ filename, musicFolder });
+      openFileInFolder({ filename });
     },
-    [openFileInFolder, musicFolder]
+    [openFileInFolder]
   );
   if (!tracks) return <h3>select tracks...</h3>;
 
@@ -24,12 +23,12 @@ export const TrackList: FunctionComponent<{
       {tracks?.map((file, index) => {
         return (
           <div
-            className={`flex gap-2 ${file.isAnalyzing ? "animate-pulse" : ""}`}
+            className={`flex gap-2 ${!file.bpm ? "animate-pulse" : ""}`}
             key={index}
           >
             <a
               className="rounded bg-white/20 p-3 text-white"
-              onClick={() => onOpenFileInFolder(file.filename)}
+              onClick={() => onOpenFileInFolder(file.path)}
             >
               {file.title}
             </a>

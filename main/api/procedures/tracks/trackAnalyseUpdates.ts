@@ -6,7 +6,7 @@ import EventEmitter from "events";
 import { Track } from "../../../track.types";
 import { trackAnalyzer } from "../../trackAnalyzer";
 
-export const trackAnalyseUpdates = publicProcedure.input(z.string()).subscription(async ({ ctx, input: musicFolder }) => {
+export const trackAnalyseUpdates = publicProcedure.subscription(async ({ ctx }) => {
 
     return observable<Track>((emit) => {
         const onAnalyzeTrackFinished = async (data: Track) => {

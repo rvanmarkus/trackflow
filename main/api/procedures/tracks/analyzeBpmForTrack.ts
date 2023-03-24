@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from "fs";
-import { mkdir, rename } from "fs/promises";
+import { copyFile, mkdir, rename } from "fs/promises";
 import path from "path";
 import { z } from "zod";
 import { analyzeBpm } from "../../../helpers/bpm";
@@ -9,23 +9,28 @@ import { trackAnalyzer } from "../../trackAnalyzer";
 import { publicProcedure } from "../../trpc";
 
 export const analyzeBpmForTrack = publicProcedure
-    .input(z.object({ filename: z.string(), bpm: z.boolean(), move: z.boolean(), musicFolder: z.string() }))
-    .mutation(async ({ input: { filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, musicFolder } }) => {
+    .input(z.object({ id: z.string(), bpm: z.boolean(), move: z.boolean(), outputFolder: z.string() }))
+    .mutation(async ({ input: { id, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, outputFolder }, ctx: { prisma } }) => {
         console.log('anaaaaa')
+        const track = await prisma.track.findFirstOrThrow({ where: { id } })
         try {
-            console.log(JSON.stringify({ filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, musicFolder }))
-            const file = readFileSync(path.join(musicFolder, filename));
+            const { file: filename, path: fullPath } = track;
+            console.log(JSON.stringify({ filename, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, outputFolder }))
+            const file = readFileSync(fullPath);
 
-            const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(path.join(musicFolder, filename)))?.TBPM);
-            trackAnalyzer.emit('trackAnalyzed', <Track>{ bpm: +bpm, filename, musicFolder, title: filename })
-            if (shouldAnalyzeBpm) {
-                await writeMetadata(path.join(musicFolder, filename), { TBPM: bpm });
-            }
+            const bpm = String(shouldAnalyzeBpm ? await analyzeBpm(file) : (await readMetadata(fullPath))?.TBPM);
+            await prisma.track.update({ where: { id }, data: { bpm: +bpm } })
+            trackAnalyzer.emit('trackAnalyzed', track)
+
+
+            await writeMetadata(fullPath, { TBPM: bpm });
+
+
             if (shouldMoveFiles) {
-                if (!existsSync(path.join(musicFolder, bpm))) {
-                    await mkdir(path.join(musicFolder, bpm));
+                if (!existsSync(path.join(outputFolder, bpm))) {
+                    await mkdir(path.join(outputFolder, bpm));
                 }
-                await rename(path.join(musicFolder, filename), path.join(musicFolder, bpm, filename));
+                await copyFile(fullPath, path.join(outputFolder, bpm, filename));
             }
             return bpm;
 

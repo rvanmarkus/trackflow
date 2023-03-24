@@ -20,7 +20,6 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 import { prisma } from "../db";
 
-type CreateContextOptions = Record<string, never>;
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
@@ -31,7 +30,7 @@ type CreateContextOptions = Record<string, never>;
  * - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-const createInnerTRPCContext = (_opts: CreateContextOptions) => {
+const createInnerTRPCContext = (_opts: Partial<CreateContextOptions>) => {
   return {
     prisma,
   };
@@ -42,7 +41,7 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = (_opts: CreateNextContextOptions) => {
+export const createTRPCContext = async (_opts: CreateContextOptions) => {
   return createInnerTRPCContext({});
 };
 
@@ -52,14 +51,15 @@ export const createTRPCContext = (_opts: CreateNextContextOptions) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-import { initTRPC } from "@trpc/server";
+import { inferRouterContext, initTRPC } from "@trpc/server";
 import superjson from "superjson";
+import { CreateContextOptions } from "electron-trpc/main";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  // transformer: superjson,
+  transformer: { serialize: (input) => input, deserialize: (input) => input },
   errorFormatter({ shape }) {
     return shape;
-  },
+  }
 });
 
 /**

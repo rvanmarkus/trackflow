@@ -29,7 +29,7 @@ export const api = createTRPCNext<AppRouter>({
        * Transformer used for data de-serialization from the server
        * @see https://trpc.io/docs/data-transformers
        **/
-      // transformer: superjson,
+      transformer: { serialize: (input) => input, deserialize: (input) => input },
 
       /**
        * Links used to determine request flow from client to server

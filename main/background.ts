@@ -4,6 +4,7 @@ import { createIPCHandler } from 'electron-trpc/main';
 import path from 'path';
 import { appRouter } from './api/root';
 import { trackRouter } from './api/routers/track-router';
+import { createTRPCContext } from './api/trpc';
 import { createWindow } from './helpers';
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -36,7 +37,7 @@ if (isProd) {
     //   event.returnValue = directory;
     // });
   }
-  createIPCHandler({ router: appRouter, windows: [mainWindow] });
+  createIPCHandler({ router: appRouter, windows: [mainWindow], createContext: createTRPCContext });
 
 })();
 
