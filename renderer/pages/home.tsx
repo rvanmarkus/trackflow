@@ -31,7 +31,7 @@ const Home: NextPage = () => {
 
 
   const onTrackAnalyseFinish = useCallback(
-    ({title, bpm}: Partial<Track>): void => {
+    ({ title, bpm }: Partial<Track>): void => {
       setProgress((progress) => progress + 1);
       setLatestTrack({ title, bpm })
       console.log(`received realtime update ${title} ${bpm}`);
@@ -85,17 +85,17 @@ const Home: NextPage = () => {
           </h1>
           <form
             onSubmit={analyzeTracks}
-            className="flex items-center justify-center w-full gap-4"
+            className="grid items-center justify-center w-full gap-4 grid-cols-3 relative"
           >
-            <TracksInput />
-            <Seperator />
-            <TracksOutput />
-            <Seperator />
+
+              <TracksInput />
+
+              <TracksOutput />
 
             <button
               type="submit"
               disabled={isAnalyzing || !outputFolder}
-              className={`flex gap-4 ${isAnalyzing && 'w-1/2'} rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
+              className={`flex gap-4 ${isAnalyzing ? 'w-full' : ''} rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}

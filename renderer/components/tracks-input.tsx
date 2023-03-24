@@ -51,7 +51,7 @@ export const TracksInput: React.FunctionComponent = () => {
     }
 
   }, [refetch])
-  return (<legend className={`flex flex-col items-center justify-center transition-all ${isTrackListVisible ? 'absolute z-100 w-full' : 'relative w-96'}`}>
+  return (<legend className={`flex flex-col items-center justify-center transition-all ${isTrackListVisible ? 'absolute z-100 w-full' : 'relative'}`}>
     <div className={`w-full p-4 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 border-dashed border-2 ${isError ? 'bg-red-600' : isTrackListVisible ? 'bg-[#15162c]' : tracks?.length ? 'bg-green-600' : 'bg-white/50'}`}>
       {isError && <span>{error.message}</span>}
       {tracks?.length ? <div className="flex items-center justify-between w-full">
