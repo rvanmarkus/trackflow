@@ -56,7 +56,7 @@ export const TracksInput: React.FunctionComponent = () => {
       {isError && <span>{error.message}</span>}
       {tracks?.length ? <div className="flex items-center justify-between w-full">
         <button onClick={toggleTrackList} className="rounded p-2 text-xl">
-          {isTrackListVisible ? 'Back' : <> Selected {tracks?.length} Tracks &#x2713;</>}
+          {isTrackListVisible ? 'Back' : <> Selected {tracks?.length} Tracks</>}
         </button>
 
         <button

@@ -9,10 +9,10 @@ import { TrackList } from "../components/track-list";
 
 import { api } from "../utils/api";
 import { TracksInput } from "../components/tracks-input";
-
+import { TracksOutput } from "../components/tracks-output";
 const Home: NextPage = () => {
   const [progess, setProgress] = useState(0);
-  const { refetch: getOutputFolder, data: outputFolder } =
+  const { data: outputFolder } =
     api.example.getOutputFolder.useQuery(undefined, { enabled: false });
 
   const {
@@ -28,9 +28,7 @@ const Home: NextPage = () => {
     isSuccess,
   } = api.example.analyzeAllTracks.useMutation();
 
-  const formRef = useRef<HTMLFormElement>(null);
-  const utils = api.useContext();
-  
+
   const onTrackAnalyseFinish = useCallback(
     ({
       filename,
@@ -54,10 +52,9 @@ const Home: NextPage = () => {
   console.log({ progess, tracks });
   const analyzeTracks = useCallback(
     (event: SyntheticEvent<HTMLFormElement>) => {
-      const form = formRef.current;
       event.preventDefault();
       setProgress(0);
-      if (!form || isAnalyzing || !tracks) return;
+      if (isAnalyzing || !tracks) return;
 
       const formValues = {
         keepOriginalFiles: false,
@@ -93,18 +90,13 @@ const Home: NextPage = () => {
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             Track<span className="text-[hsl(280,100%,70%)]">Flow</span>
           </h1>
-          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8"> */}
           <form
             onSubmit={analyzeTracks}
-            ref={formRef}
             className="flex items-center justify-center w-full gap-4"
           >
             <TracksInput />
             <Seperator />
-            <legend className="flex flex-col items-center">
-
-              <button type="button" onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
-            </legend>
+            <TracksOutput />
             <Seperator />
 
             <button
@@ -114,7 +106,7 @@ const Home: NextPage = () => {
                 }`}
             >
               {isAnalyzing && <Spinner />}
-              <h3 className="text-2xl font-bold z-10">
+              <h3 className="text-2xl font-bold ">
                 {isSuccess ? (
                   <>Completed &#x2713; </>
                 ) : isAnalyzing ? (
@@ -130,9 +122,7 @@ const Home: NextPage = () => {
               ></div>
             </button>
           </form>
-          {/* </div> */}
           {isError && <p>{error.message}</p>}
-          {/* <TrackList tracks={tracks} /> */}
         </div>
       </main>
     </>
