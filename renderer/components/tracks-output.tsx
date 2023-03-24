@@ -7,7 +7,7 @@ export const TracksOutput = () => {
       <button
         type="button"
         onClick={() => getOutputFolder()}
-        className={`rounded-xl p-4 text-white ${outputFolder ? 'bg-green-600 hover:bg-green-500 text-md' : 'bg-white/10 hover:bg-white/20 '}`}>
+        className={`rounded-xl p-4 text-white break-words ${outputFolder ? 'bg-green-600 hover:bg-green-500 text-md' : 'bg-white/10 hover:bg-white/20 '}`}>
         {outputFolder ?? 'Select destination folder'}
       </button>
   );
