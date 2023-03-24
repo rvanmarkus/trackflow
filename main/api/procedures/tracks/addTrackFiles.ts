@@ -1,3 +1,4 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { dialog } from "electron";
 import path from "path";
 import { z } from "zod";
@@ -10,7 +11,7 @@ export const addTrackFiles = publicProcedure
     z.optional(
       z.array(
         z.string({ description: 'FilePath' })
-          .refine((path) => allowedFileExtensions.some(ext => path.endsWith(ext)), { message: "Not a music file" }),
+          .refine((path) => allowedFileExtensions.some(ext => path.endsWith(ext)), {message: "Not a music file"}),
         { description: 'Files' })))
   .mutation(
     async ({ ctx: { prisma }, input }) => {
@@ -29,6 +30,11 @@ export const addTrackFiles = publicProcedure
             }))
 
           } catch (e) {
+            if (e instanceof PrismaClientKnownRequestError) {
+              if (e.code === 'P2002') {
+                throw 'Track already in selection';
+              }
+            }
             console.log(`Error reading meta data: ${e}`)
             throw `Error proccessing one of the tracks: ${e}`
           }

@@ -8,10 +8,16 @@ export const TracksInput: React.FunctionComponent = () => {
     refetch,
     isLoading: isLoadingTracks
   } = api.example.getAllTracks.useQuery();
-  const addFiles = useCallback(async () => {
-    await addTracks();
-    refetch();
-  }, [addTracks]);
+  const addFiles = useCallback(async (filePaths?: string[]) => {
+    try {
+      await addTracks(filePaths)
+    }
+    catch (e) { console.error(`Error adding track: ${e}`) }
+    finally {
+      refetch()
+    }
+  }, [addTracks, refetch]);
+  const onAddFiles = useCallback(() => addFiles(), [addFiles])
   const { mutate: clearAllTracks, isLoading: isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
 
   const [isDragging, setDragging] = useState<boolean>()
@@ -30,13 +36,8 @@ export const TracksInput: React.FunctionComponent = () => {
       event.stopPropagation();
       console.log('File droppp')
       setDragging(false)
-      try {
-        await addTracks(Array.from<{ path: string }>((event as unknown as any).dataTransfer.files).map(f => f.path))
-      }
-      catch (e) { }
-      finally {
-        refetch()
-      }
+      const files = Array.from<{ path: string }>((event as unknown as any).dataTransfer.files).map(f => f.path);
+      await addFiles(files)
     }
     const onDragOver = (event: DragEvent) => {
       event.preventDefault();
@@ -73,7 +74,7 @@ export const TracksInput: React.FunctionComponent = () => {
         </>}
 
       <button
-        onClick={addFiles}
+        onClick={onAddFiles}
         type="button"
         className="uppercase bg-green-700 p-2 text-sm rounded"
       >
