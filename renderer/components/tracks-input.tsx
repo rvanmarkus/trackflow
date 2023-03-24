@@ -54,18 +54,17 @@ export const TracksInput: React.FunctionComponent = () => {
   }, [setDragging, refetch])
   return (<legend className="flex flex-col items-center justify-center p-4 relative w-96">
     <div onDragEnter={onDragEnter} onDragLeave={onDragLeave} className={`absolute top-0 left-0 w-full h-full z-10 ${isDragging && 'z-20'}`}></div>
-    <div className={`w-full border-dashed border-2 p-12 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : 'bg-white/50'}`}>
-      {isDragging ? <p className="font-sans text-2xl"> Drop here </p> : isError ? <span>{error.message}</span> : <><label className="font-sans text-xl">
-        Drag and drop your music files{" "}
-        <span className="italic">or </span>
+    <div className={`w-full border-dashed border-2 p-8 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : 'bg-white/50'}`}>
+      {isDragging ? <p className="font-sans text-md"> Drop here </p> : isError ? <span>{error.message}</span> : <><label className="font-sans text-xl">
+        Drag and drop your music files
+      </label>
         <button
           onClick={addFiles}
           type="button"
-          className="uppercase bg-green-700 p-2 text-sm "
+          className="uppercase bg-green-700 p-2 text-sm rounded"
         >
           Add Tracks
         </button>
-      </label>
       </>}
 
       {!isDragging && tracks?.length ? <h2>
