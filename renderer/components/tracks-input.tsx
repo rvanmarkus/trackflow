@@ -1,5 +1,6 @@
 import { DragEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../utils/api";
+import { TrackList } from "./track-list";
 
 export const TracksInput: React.FunctionComponent = () => {
   const { mutateAsync: addTracks, isLoading, isSuccess, isError, error } = api.example.addTrackFiles.useMutation();
@@ -58,7 +59,7 @@ export const TracksInput: React.FunctionComponent = () => {
   }, [setDragging, refetch])
   return (<legend className={`flex flex-col items-center justify-center transition-all ${isTrackListVisible ? 'absolute z-100 w-full' : 'relative w-96'}`}>
     <div onDragEnter={onDragEnter} onDragLeave={onDragLeave} className={`absolute top-0 left-0 w-full h-full z-10 ${isDragging && 'z-20'}`}></div>
-    <div className={`w-full p-6 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 border-dashed border-2 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : isTrackListVisible ? 'bg-white' : 'bg-white/50'}`}>
+    <div className={`w-full p-6 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 border-dashed border-2 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : isTrackListVisible ? 'bg-[#15162c]' : 'bg-white/50'}`}>
       {isDragging && <p className="font-sans text-md"> Drop here </p>}
       {isError && <span>{error.message}</span>}
       {tracks?.length ? <div>
@@ -86,7 +87,7 @@ export const TracksInput: React.FunctionComponent = () => {
             Add Tracks
           </button>
         </>}
-
+      {isTrackListVisible && <TrackList tracks={tracks} />}
     </div>
   </legend>);
 };
