@@ -1,28 +1,38 @@
-# Create T3 App
+<p align="center"><img src="https://i.imgur.com/a9QWW0v.png"></p>
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## Usage
 
-## What's next? How do I make an app with this?
+### Create an App
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+```
+# with npx
+$ npx create-nextron-app my-app --example with-tailwindcss
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+# with yarn
+$ yarn create nextron-app my-app --example with-tailwindcss
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+# with pnpx
+$ pnpx create-nextron-app my-app --example with-tailwindcss
+```
 
-## Learn More
+### Install Dependencies
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+```
+$ cd my-app
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+# using yarn or npm
+$ yarn (or `npm install`)
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+# using pnpm
+$ pnpm install --shamefully-hoist
+```
 
-## How do I deploy this?
+### Use it
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+```
+# development mode
+$ yarn dev (or `npm run dev` or `pnpm run dev`)
+
+# production build
+$ yarn build (or `npm run build` or `pnpm run build`)
+```
