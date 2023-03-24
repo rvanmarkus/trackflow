@@ -8,11 +8,11 @@ export const TracksInput: React.FunctionComponent = () => {
     refetch,
     isLoading: isLoadingTracks
   } = api.example.getAllTracks.useQuery();
-  const openFolder = useCallback(() => {
-    console.log("opening folder");
-    addTracks();
+  const addFiles = useCallback(async () => {
+    await addTracks();
+    refetch();
   }, [addTracks]);
-  const { mutate: clearAllTracks, isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
+  const { mutate: clearAllTracks, isLoading: isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
 
   const [isDragging, setDragging] = useState<boolean>()
 
@@ -59,7 +59,7 @@ export const TracksInput: React.FunctionComponent = () => {
         Drag and drop your music files{" "}
         <span className="italic">or </span>
         <button
-          onClick={openFolder}
+          onClick={addFiles}
           type="button"
           className="uppercase bg-green-700 p-2 text-sm "
         >
@@ -68,7 +68,7 @@ export const TracksInput: React.FunctionComponent = () => {
       </label>
       </>}
 
-      {!isDragging && tracks?.length ?<h2>
+      {!isDragging && tracks?.length ? <h2>
         {isLoadingTracks ? 'Loading tracks... ' : `${tracks?.length} Tracks `}
         <button
           type="button"
