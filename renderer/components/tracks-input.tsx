@@ -19,27 +19,21 @@ export const TracksInput: React.FunctionComponent = () => {
     }
   }, [addTracks, refetch]);
   const onAddFiles = useCallback(() => addFiles(), [addFiles])
-  const { mutate: clearAllTracks, isLoading: isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
-
-  const [isDragging, setDragging] = useState<boolean>(false)
   const [isTrackListVisible, setTrackListVisible] = useState<boolean>(false)
   const toggleTrackList = useCallback(() => {
     setTrackListVisible((visible) => !visible)
   }, [setTrackListVisible])
-  const onDragEnter = useCallback<DragEventHandler>((event) => {
-    setDragging(true)
-  }, [setDragging])
-  const onDragLeave = useCallback<DragEventHandler>((event) => {
-    setDragging(false)
-  }, [setDragging])
-
+  const { mutate: clearAllTracks, isLoading: isDeleting } = api.example.clearAllTracks.useMutation({ onSuccess: () => refetch() });
+  const onClearAllTracks = useCallback(async () => {
+    setTrackListVisible(false)
+    clearAllTracks()
+  }, [setTrackListVisible, clearAllTracks])
   useEffect(() => {
     console.log('test')
     const onFileDrop = async (event: DragEvent) => {
       event.preventDefault();
       event.stopPropagation();
       console.log('File droppp')
-      setDragging(false)
       const files = Array.from<{ path: string }>((event as unknown as any).dataTransfer.files).map(f => f.path);
       await addFiles(files)
     }
@@ -56,22 +50,21 @@ export const TracksInput: React.FunctionComponent = () => {
       document.removeEventListener('dragover', onDragOver)
     }
 
-  }, [setDragging, refetch])
+  }, [refetch])
   return (<legend className={`flex flex-col items-center justify-center transition-all ${isTrackListVisible ? 'absolute z-100 w-full' : 'relative w-96'}`}>
-    <div onDragEnter={onDragEnter} onDragLeave={onDragLeave} className={`absolute top-0 left-0 w-full h-full z-10 ${isDragging && 'z-20'}`}></div>
-    <div className={`w-full p-6 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 border-dashed border-2 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : isTrackListVisible ? 'bg-[#15162c]' : 'bg-white/50'}`}>
-      {isDragging && <p className="font-sans text-md"> Drop here </p>}
+    <div className={`w-full p-4 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 border-dashed border-2 ${isError ? 'bg-red-600' : isTrackListVisible ? 'bg-[#15162c]' : tracks?.length ? 'bg-green-600' : 'bg-white/50'}`}>
       {isError && <span>{error.message}</span>}
-      {tracks?.length ? <div>
-        <button onClick={toggleTrackList} className="rounded p-2 bg-teal-600">
-          {isTrackListVisible ? 'Back' : `Show ${tracks?.length} Tracks`}
+      {tracks?.length ? <div className="flex items-center justify-between w-full">
+        <button onClick={toggleTrackList} className="rounded p-2 text-xl">
+          {isTrackListVisible ? 'Back' : <> Selected {tracks?.length} Tracks &#x2713;</>}
         </button>
+
         <button
           type="button"
           disabled={isDeleting || !tracks?.length}
-          className="rounded p-2 mx-3 disabled:bg-red-100 bg-red-600 text-white  disabled:text-red-300"
-          onClick={() => clearAllTracks()}>
-          Clear
+          className="disabled:bg-red-100 disabled:text-gray-300 bg-red-600 rounded h-6 w-6 mx-2`"
+          onClick={onClearAllTracks}>
+          X
         </button>
       </div>
 
