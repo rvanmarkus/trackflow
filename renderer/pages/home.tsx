@@ -79,7 +79,7 @@ const Home: NextPage = () => {
   );
   const progressWidth = (progess / tracks?.length ?? 0) * 100;
   const Seperator = () => (
-    <div className="w-[2px] bg-white h-4 m-0 rounded"></div>
+    <div className="h-[2px] bg-white w-4 rounded"></div>
   );
   return (
     <>
@@ -97,11 +97,11 @@ const Home: NextPage = () => {
           <form
             onSubmit={analyzeTracks}
             ref={formRef}
-            className="flex flex-col items-center justify-center w-full"
+            className="flex items-center justify-center w-full gap-4"
           >
             <TracksInput />
             <Seperator />
-            <legend className="flex flex-col items-center p-4">
+            <legend className="flex flex-col items-center">
 
               <button type="button" onClick={() => getOutputFolder()} className="rounded-xl bg-white/10 p-4 text-white hover:bg-white/2">{outputFolder ?? 'Select destination folder'}</button>
             </legend>
@@ -110,7 +110,7 @@ const Home: NextPage = () => {
             <button
               type="submit"
               disabled={isAnalyzing || !outputFolder}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "cursor-wait opacity-50" : ""
+              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}
