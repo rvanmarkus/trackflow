@@ -4,7 +4,7 @@ export const Spinner: FunctionComponent<PropsWithChildren> = ({ children }) => (
   <div role="status">
     <svg
       aria-hidden="true"
-      className="mr-2 h-8 w-8 animate-spin fill-[hsl(280,100%,70%)] text-gray-200 dark:text-gray-800"
+      className="mr-2 h-8 w-8 z-20 relative animate-spin fill-[hsl(280,100%,70%)] text-gray-200 dark:text-gray-800"
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

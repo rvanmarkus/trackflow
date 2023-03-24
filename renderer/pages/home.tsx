@@ -11,7 +11,8 @@ import { api } from "../utils/api";
 import { TracksInput } from "../components/tracks-input";
 import { TracksOutput } from "../components/tracks-output";
 const Home: NextPage = () => {
-  const [progess, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [latestTrack, setLatestTrack] = useState<{ title: string, bpm: number } | undefined>()
   const { data: outputFolder } =
     api.example.getOutputFolder.useQuery(undefined, { enabled: false });
 
@@ -30,26 +31,18 @@ const Home: NextPage = () => {
 
 
   const onTrackAnalyseFinish = useCallback(
-    ({
-      filename,
-      bpm,
-    }: {
-      filename?: string;
-      bpm?: number;
-      title?: string;
-      artist?: string;
-      isAnalyzing?: boolean;
-    }): void => {
+    ({title, bpm}: Partial<Track>): void => {
       setProgress((progress) => progress + 1);
-      console.log(`received realtime update ${filename} ${bpm}`);
+      setLatestTrack({ title, bpm })
+      console.log(`received realtime update ${title} ${bpm}`);
     },
-    [setProgress, tracks]
+    [setProgress, setLatestTrack]
   );
 
   api.example.trackAnalyseUpdates.useSubscription(undefined, {
-    onData: onTrackAnalyseFinish,
+    onData: onTrackAnalyseFinish
   });
-  console.log({ progess, tracks });
+  console.log({ progess: progress, tracks });
   const analyzeTracks = useCallback(
     (event: SyntheticEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -74,7 +67,7 @@ const Home: NextPage = () => {
       setProgress,
     ]
   );
-  const progressWidth = (progess / tracks?.length ?? 0) * 100;
+  const progressWidth = (progress / tracks?.length ?? 0) * 100;
   const Seperator = () => (
     <div className="h-[2px] bg-white w-4 rounded"></div>
   );
@@ -102,15 +95,15 @@ const Home: NextPage = () => {
             <button
               type="submit"
               disabled={isAnalyzing || !outputFolder}
-              className={`flex max-w-xs gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
+              className={`flex gap-4 ${isAnalyzing && 'w-1/2'} rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}
-              <h3 className="text-2xl font-bold ">
+              <h3 className="text-xl font-bold w-full relative z-10">
                 {isSuccess ? (
                   <>Completed &#x2713; </>
                 ) : isAnalyzing ? (
-                  "Scanning tracks..."
+                  latestTrack ? `Finished ${latestTrack.title?.substring(latestTrack.title.length - 20)}` : "Scanning tracks..."
                 ) : (
                   "Scan tracks→"
                 )}
