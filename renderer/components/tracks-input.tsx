@@ -54,31 +54,31 @@ export const TracksInput: React.FunctionComponent = () => {
   }, [setDragging, refetch])
   return (<legend className="flex flex-col items-center justify-center p-4 relative w-96">
     <div onDragEnter={onDragEnter} onDragLeave={onDragLeave} className={`absolute top-0 left-0 w-full h-full z-10 ${isDragging && 'z-20'}`}></div>
-    <div className={`w-full border-dashed border-2 p-8 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : 'bg-white/50'}`}>
-      {isDragging ? <p className="font-sans text-md"> Drop here </p> : isError ? <span>{error.message}</span> : <><label className="font-sans text-xl">
-        Drag and drop your music files
-      </label>
-        <button
-          onClick={addFiles}
-          type="button"
-          className="uppercase bg-green-700 p-2 text-sm rounded"
-        >
-          Add Tracks
-        </button>
-      </>}
-
-      {!isDragging && tracks?.length ? <h2>
-        {isLoadingTracks ? 'Loading tracks... ' : `${tracks?.length} Tracks `}
+    <div className={`w-full p-8 items-center justify-center rounded-xl flex flex-col gap-4 transition-all z-10 ${isDragging ? 'bg-[hsl(280,100%,70%)] h-48' : isError ? 'bg-red-600' : 'bg-white/50'} ${tracks?.length && !isLoadingTracks ? '' : ' border-dashed border-2'}`}>
+      {isDragging && <p className="font-sans text-md"> Drop here </p>}
+      {isError && <span>{error.message}</span>}
+      {tracks?.length ? <h2> {tracks?.length} Tracks
         <button
           type="button"
           disabled={isDeleting || !tracks?.length}
-          className="rounded p-3 disabled:bg-red-100 bg-red-600 text-white  disabled:text-red-300"
+          className="rounded p-3 mx-3 disabled:bg-red-100 bg-red-600 text-white  disabled:text-red-300"
           onClick={() => clearAllTracks()}>
           X
         </button>
+      </h2>
 
-      </h2> : ""}
+        : <><label className="font-sans text-xl">
+          Drag and drop your music files
+        </label>
+        </>}
 
+      <button
+        onClick={addFiles}
+        type="button"
+        className="uppercase bg-green-700 p-2 text-sm rounded"
+      >
+        Add Tracks
+      </button>
     </div>
   </legend>);
 };
