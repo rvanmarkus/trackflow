@@ -42,15 +42,20 @@ export const TrackList: FunctionComponent = () => {
             <a
               key={index}
               className="rounded bg-white/20 p-3 col-span-4 break-words text-white"
-              onClick={() => onOpenFileInFolder(track.path)}
             >
               {track.title}
             </a>
             <div className="rounded bg-white/20 col-span-1 p-3 text-white">
               {track.bpm ?? "No BPM"}
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <DeleteButton disabled={isDeleting} onClick={() => onDeleteTrack(track.id)} />
+              <button
+                type="button"
+                onClick={() => onOpenFileInFolder(track.path)}
+                className="text-md h-6 w-6 bg-blue-500 rounded text-center leading-5">
+                🔍
+              </button>
             </div>
           </>
         );
