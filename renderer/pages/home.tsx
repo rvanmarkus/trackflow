@@ -85,17 +85,14 @@ const Home: NextPage = () => {
           </h1>
           <form
             onSubmit={analyzeTracks}
-            className="grid items-center justify-center w-full gap-4 grid-cols-3 relative"
+            className="grid items-center w-full gap-4 grid-cols-3 relative"
           >
-
-              <TracksInput />
-
-              <TracksOutput />
-
+            <TracksInput />
+            <TracksOutput />
             <button
               type="submit"
               disabled={isAnalyzing || !outputFolder}
-              className={`flex gap-4 ${isAnalyzing ? 'w-full' : ''} rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
+              className={`flex h-full gap-4 ${isAnalyzing ? 'w-full' : ''} items-center rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}

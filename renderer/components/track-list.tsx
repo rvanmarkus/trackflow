@@ -19,15 +19,23 @@ export const TrackList: FunctionComponent<{
   if (!tracks) return <h3>select tracks...</h3>;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="grid grid-cols-5 gap-2 grid-flow-row-dense">
+      <header
+        className="rounded font-bold p-3 col-span-4 text-white"
+      >
+        Title
+      </header>
+      <header
+        className="rounded font-bold p-3 text-white"
+      >
+        BPM
+      </header>
       {tracks?.map((file, index) => {
         return (
-          <div
-            className={`flex gap-2 ${!file.bpm ? "animate-pulse" : ""}`}
-            key={index}
-          >
+          <>
             <a
-              className="rounded bg-white/20 p-3 text-white"
+              key={index}
+              className="rounded bg-white/20 p-3 col-span-4 break-words text-white"
               onClick={() => onOpenFileInFolder(file.path)}
             >
               {file.title}
@@ -35,7 +43,7 @@ export const TrackList: FunctionComponent<{
             <div className="rounded bg-white/20 p-3 text-white">
               {file.bpm ?? "No BPM"}
             </div>
-          </div>
+          </>
         );
       })}
     </div>
