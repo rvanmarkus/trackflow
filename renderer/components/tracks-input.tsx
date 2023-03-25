@@ -1,5 +1,6 @@
 import { DragEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../utils/api";
+import { DeleteButton } from "./delete-button";
 import { TrackList } from "./track-list";
 
 export const TracksInput: React.FunctionComponent = () => {
@@ -59,13 +60,7 @@ export const TracksInput: React.FunctionComponent = () => {
           {isTrackListVisible ? 'Back' : <> Selected {tracks?.length} Tracks</>}
         </button>
 
-        <button
-          type="button"
-          disabled={isDeleting || !tracks?.length}
-          className="disabled:bg-red-100 disabled:text-gray-300 bg-red-600 rounded h-6 w-6 mx-2`"
-          onClick={onClearAllTracks}>
-          X
-        </button>
+        {!isTrackListVisible && <DeleteButton disabled={isDeleting || !tracks?.length} onClick={onClearAllTracks} />}
       </div>
 
         : <>
@@ -80,7 +75,7 @@ export const TracksInput: React.FunctionComponent = () => {
             Add Tracks
           </button>
         </>}
-      {isTrackListVisible && <TrackList tracks={tracks} />}
+      {isTrackListVisible && <TrackList />}
     </div>
   );
 };
