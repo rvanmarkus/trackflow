@@ -53,7 +53,7 @@ export const TrackList: FunctionComponent = () => {
               <button
                 type="button"
                 onClick={() => onOpenFileInFolder(track.path)}
-                className="text-md h-6 w-6 bg-blue-500 rounded text-center leading-5">
+                className="text-md h-6 w-6 bg-blue-500 rounded text-center leading-5" title="Open in file explorer" >
                 🔍
               </button>
             </div>
