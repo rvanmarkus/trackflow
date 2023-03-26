@@ -11,7 +11,7 @@ export const addTrackFiles = publicProcedure
     z.optional(
       z.array(
         z.string({ description: 'FilePath' })
-          .refine((path) => allowedFileExtensions.some(ext => path.endsWith(ext)), {message: "Not a music file"}),
+          .refine((path) => allowedFileExtensions.some(ext => path.endsWith(ext)), { message: "Not a music file" }),
         { description: 'Files' })))
   .mutation(
     async ({ ctx: { prisma }, input }) => {
@@ -22,11 +22,12 @@ export const addTrackFiles = publicProcedure
       return await Promise.all(
         filePaths.map(async (file) => {
           try {
-            const { title, TBPM } = await readMetadata(file);
+            const { title, artist, TBPM } = await readMetadata(file);
             const { base } = path.parse(file);
 
+            const track = { file: base, title: title ?? base, bpm: TBPM ? Number(TBPM) : null, path: file, artist };
             return (await prisma.track.create({
-              data: { file: base, title: title ?? base, bpm: TBPM ? Number(TBPM) : null, path: file },
+              data: track,
             }))
 
           } catch (e) {

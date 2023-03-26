@@ -9,8 +9,21 @@ import { trackAnalyzer } from "../../trackAnalyzer";
 import { publicProcedure } from "../../trpc";
 
 export const analyzeBpmForTrack = publicProcedure
-    .input(z.object({ id: z.string(), bpm: z.boolean(), move: z.boolean(), outputFolder: z.string() }))
-    .mutation(async ({ input: { id, bpm: shouldAnalyzeBpm, move: shouldMoveFiles, outputFolder }, ctx: { prisma } }) => {
+    .input(
+        z.object({
+            id: z.string(),
+            bpm: z.boolean().default(true),
+            copy: z.boolean().default(false),
+            outputFolder: z.string().optional()
+        })
+            .refine((input) => {
+                if (input.copy) {
+                    return !!input.outputFolder
+                }
+                return true;
+            })
+    )
+    .mutation(async ({ input: { id, bpm: shouldAnalyzeBpm, copy: shouldMoveFiles, outputFolder }, ctx: { prisma } }) => {
         console.log('anaaaaa')
         const track = await prisma.track.findFirstOrThrow({ where: { id } })
         try {

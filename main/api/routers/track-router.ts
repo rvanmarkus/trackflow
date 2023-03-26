@@ -11,6 +11,7 @@ import { addTrackFiles } from "../procedures/tracks/addTrackFiles";
 import { getOutputFolder } from "../procedures/tracks/addOutputFolder";
 import { clearAllTracks } from "../procedures/tracks/clearAllTracks";
 import { deleteTrack } from "../procedures/tracks/deleteTrack";
+import { updateTrack } from "../procedures/tracks/updateTrack";
 
 
 
@@ -24,6 +25,7 @@ export const trackRouter = createTRPCRouter({
   openFileInFolder,
   getOutputFolder,
   clearAllTracks,
-  deleteTrack
+  deleteTrack,
+  updateTrack
 });
 

@@ -44,10 +44,9 @@ const Home: NextPage = () => {
   });
   console.log({ progess: progress, tracks });
   const analyzeTracks = useCallback(
-    (event: SyntheticEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    () => {
       setProgress(0);
-      if (isAnalyzing || !tracks) return;
+      if (isAnalyzing) return;
 
       const formValues = {
         keepOriginalFiles: false,
@@ -62,15 +61,13 @@ const Home: NextPage = () => {
     },
     [
       isAnalyzing,
-      tracks,
       analyzeAllTracks,
       setProgress,
+      outputFolder,
     ]
   );
   const progressWidth = (progress / tracks?.length ?? 0) * 100;
-  const Seperator = () => (
-    <div className="h-[2px] bg-white w-4 rounded"></div>
-  );
+
   return (
     <>
       <Head>
@@ -83,14 +80,14 @@ const Home: NextPage = () => {
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             Track<span className="text-[hsl(280,100%,70%)]">Flow</span>
           </h1>
-          <form
-            onSubmit={analyzeTracks}
+          <div
             className="grid items-center w-full gap-4 grid-cols-3 relative"
           >
             <TracksInput />
             <TracksOutput />
             <button
-              type="submit"
+              type="button"
+              onClick={analyzeTracks}
               disabled={isAnalyzing || !outputFolder}
               className={`flex h-full gap-4 ${isAnalyzing ? 'w-full' : ''} items-center rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
@@ -102,16 +99,15 @@ const Home: NextPage = () => {
                 ) : isAnalyzing ? (
                   latestTrack ? `Finished ${latestTrack.title?.substring(latestTrack.title.length - 20)}` : "Scanning tracks..."
                 ) : (
-                  "Scan tracks→"
+                  "Scan tracks →"
                 )}
               </h3>
-
               <div
                 className="z-0 absolute h-full bg-green-600 top-0 left-0 transition-width"
                 style={{ width: `${isAnalyzing ? progressWidth : 0}%` }}
               ></div>
             </button>
-          </form>
+          </div>
           {isError && <p>{error.message}</p>}
         </div>
       </main>

@@ -14,6 +14,7 @@ model Track {
     id        String   @id @default(cuid())
     file      String
     path      String
+    artist    String?
     title     String @unique
     bpm       Int?
     createdAt DateTime @default(now())

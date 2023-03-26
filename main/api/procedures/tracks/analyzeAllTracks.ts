@@ -17,7 +17,7 @@ export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFil
                 analyzedTracks.push((await caller.analyzeBpmForTrack({
                     id: track.id,
                     bpm: !Boolean(track.bpm),
-                    move: !keepOriginalFiles,
+                    copy: !keepOriginalFiles,
                     outputFolder
                 })))
 
