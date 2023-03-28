@@ -37,6 +37,7 @@ export const addMusicFolder = publicProcedure.query(
             data: {
               title: title ?? filename,
               file: filename,
+              path: filename,
               ...(TBPM ? { bpm: Number(TBPM) } : {}),
             },
           });

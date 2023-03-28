@@ -4,8 +4,10 @@ import { Track } from "../../../track.types";
 import { trackRouter } from "../../routers/track-router";
 import { publicProcedure } from "../../trpc";
 
-export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFiles: z.boolean(), outputFolder: z.string()}))
-    .mutation(async ({ input: { keepOriginalFiles, outputFolder }, ctx }) => {
+export const analyzeAllTracks = publicProcedure.input(z.object({ exportFiles: z.boolean().default(false), outputFolder: z.string().optional() })
+    // .refine(input => input.exportFiles && !input.outputFolder, { message: 'Output folder should be defined when exportFiles option is enabled' })
+)
+    .mutation(async ({ input: { exportFiles, outputFolder }, ctx }) => {
         const caller = trackRouter.createCaller(ctx);
         const tracks = await caller.getAllTracks()
 
@@ -17,11 +19,11 @@ export const analyzeAllTracks = publicProcedure.input(z.object({ keepOriginalFil
                 analyzedTracks.push((await caller.analyzeBpmForTrack({
                     id: track.id,
                     bpm: !Boolean(track.bpm),
-                    copy: !keepOriginalFiles,
+                    copy: exportFiles,
                     outputFolder
                 })))
 
-                
+
             } catch (error) {
                 console.log({ error });
             }

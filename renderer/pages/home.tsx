@@ -49,7 +49,7 @@ const Home: NextPage = () => {
       if (isAnalyzing) return;
 
       const formValues = {
-        keepOriginalFiles: false,
+        exportFiles: isSuccess,
       };
       void (async (formValues) => {
         try {
@@ -64,6 +64,7 @@ const Home: NextPage = () => {
       analyzeAllTracks,
       setProgress,
       outputFolder,
+      isSuccess
     ]
   );
   const progressWidth = (progress / tracks?.length ?? 0) * 100;
@@ -81,20 +82,20 @@ const Home: NextPage = () => {
             Track<span className="text-[hsl(280,100%,70%)]">Flow</span>
           </h1>
           <div
-            className="grid items-center w-full gap-4 grid-cols-3 relative"
+            className="grid items-center w-full gap-4 grid-cols-2 relative"
           >
-            <TracksInput />
-            <TracksOutput />
+            {isSuccess ? <TracksOutput /> : <TracksInput />}
+            
             <button
               type="button"
               onClick={analyzeTracks}
-              disabled={isAnalyzing || !outputFolder}
+              disabled={isAnalyzing && !tracks?.length}
               className={`flex h-full gap-4 ${isAnalyzing ? 'w-full' : ''} items-center rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 relative overflow-hidden ${isAnalyzing || isLoadingTracks || !outputFolder ? "opacity-50" : ""
                 }`}
             >
               {isAnalyzing && <Spinner />}
               <h3 className="text-xl font-bold w-full relative z-10">
-                {isSuccess ? (
+                {(isSuccess && outputFolder) ? <>Copy files</> : (isSuccess) ? (
                   <>Completed &#x2713; </>
                 ) : isAnalyzing ? (
                   latestTrack ? `Finished ${latestTrack.title?.substring(latestTrack.title.length - 20)}` : "Scanning tracks..."
