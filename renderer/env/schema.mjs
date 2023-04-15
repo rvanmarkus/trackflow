@@ -1,4 +1,6 @@
 // @ts-check
+import { app } from "electron";
+import path from "path";
 import { z } from "zod";
 
 /**
@@ -16,8 +18,8 @@ export const serverSchema = z.object({
  * @type {{ [k in keyof z.infer<typeof serverSchema>]: z.infer<typeof serverSchema>[k] | undefined }}
  */
 export const serverEnv = {
-  DATABASE_URL: process.env.DATABASE_URL,
-  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL: process.env.DATABASE_URL ?? path.join(app.getPath('userData'), 'db.sqlite'),
+  NODE_ENV: process.env.NODE_ENV ?? 'production',
 };
 
 /**

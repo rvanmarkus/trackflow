@@ -4,6 +4,12 @@ copyright: Copyright © 2018 Yoshihide Shiono
 directories:
   output: dist
   buildResources: resources
+extraResources:
+  - .env
+  - prisma/**/*
+  - node_modules/.prisma/**/*
+  - node_modules/@prisma/client/**/*
+  # - node_modules/ffmpeg-static/**/*
 files:
   - from: .
     filter:

@@ -1,8 +1,10 @@
 import { Track } from '@prisma/client';
 import ffmetadata from 'ffmetadata';
 import path from 'path';
-const ffmpegPath = process.platform === "win32" ? "C:/ffmpeg/ffmpeg.exe" : path.join('ffmpeg', 'ffmpeg');
-ffmetadata.setFfmpegPath(ffmpegPath);
+import ffmpegPath from 'ffmpeg-static';
+import { env } from '../../renderer/env/server.mjs';
+
+ffmetadata.setFfmpegPath(env.NODE_ENV == 'production' ? ffmpegPath.replace('app.asar', 'app.asar.unpacked') : ffmpegPath);
 export type MP3Metadata = Record<string, string> & {
     TBPM?: string,
     artist?: string
