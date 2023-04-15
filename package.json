@@ -44,5 +44,5 @@
     "web-audio-api": "^0.2.2",
     "zod": "^3.20.2"
   },
-  "prisma": {"schema": "schema.prisma"}
+  "prisma": {"schema": "prisma/schema.prisma"}
 }
