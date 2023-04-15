@@ -1,6 +1,6 @@
 appId: com.example.nextron
-productName: My Nextron App
-copyright: Copyright © 2018 Yoshihide Shiono
+productName: TrackFlow
+copyright: Copyright © 2023 Sebastiaan van Dijkhuizen & Robbert van Markus
 directories:
   output: dist
   buildResources: resources
