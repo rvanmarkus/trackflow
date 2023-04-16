@@ -5,3 +5,4 @@ app
 dist
 music
 prisma/db.sqlite
+.env
