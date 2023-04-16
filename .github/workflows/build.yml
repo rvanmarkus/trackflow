@@ -20,6 +20,24 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v1
 
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: npm list
+
       - name: Install Node.js, NPM
         uses: actions/setup-node@v3
         with:
@@ -37,13 +55,16 @@ jobs:
       - name: Build app
         run: npm run build
 
+      - name: Create Artifact archive
+        run: tar -cvf dist-${{ matrix.os }}.tar dist
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist-${{ matrix.os }}
           retention-days: 5
-          path: |
-            dist
+          path: dist-${{ matrix.os }}.tar
+            
       # - name: Build/release Electron app
       #   uses: samuelmeuli/action-electron-builder@v1
       #   with:
@@ -58,6 +79,7 @@ jobs:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
     needs: build
+    permissions: write-all
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -71,6 +93,4 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
-            *.exe
-            *.dmg
-            *.zip
+            **/*.tar
